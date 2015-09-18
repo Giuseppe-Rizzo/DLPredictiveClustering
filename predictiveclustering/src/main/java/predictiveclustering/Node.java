@@ -10,6 +10,14 @@ public class Node<E,Model> {
 	private E  t;
 	private Model model;
 	PredictiveTree pos;
+	public E getT() {
+		return t;
+	}
+
+	public Model getModel() {
+		return model;
+	}
+
 	PredictiveTree neg;
 	
 	public Node(E test, Model model) {
