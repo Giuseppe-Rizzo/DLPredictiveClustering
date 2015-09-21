@@ -68,9 +68,13 @@ public class PredictiveClusterInducer<E> {
 //
 		while (!stack.isEmpty()){
 			
+			
+			
 			Couple<PredictiveTree<OWLClassExpression, Model<E>>, Npla<SortedSet<OWLIndividual>, SortedSet<OWLIndividual>, SortedSet<OWLIndividual>, Integer, Double, Double>> pop = stack.pop();
 			PredictiveTree<OWLClassExpression, Model<E>> currentTree = pop.getFirstElement();
 			// generate the candidate concepts
+			
+			if (!stopcondition(currentTree)){
 			Set<OWLClassExpression> refinements = dlTreesRefinementOperator.refine(null,posExs, negExs); // neg exs will be empty
 			// for each candidate computes the local models if it exists
 			OWLClassExpression[] ref= refinements.toArray(new OWLClassExpression[refinements.size()]);
@@ -85,7 +89,7 @@ public class PredictiveClusterInducer<E> {
 			SortedSet<OWLIndividual> negExsT = new TreeSet<OWLIndividual>();
 			Split.split(bestDescription, reasoner.getManager().getOWLDataFactory(), reasoner, posExs, negExs, undExs, posExsT, negExsT, undExsT, posExsF, negExsF, undExsF); 
 			
-			
+			}
 			
 			
 			
@@ -93,6 +97,12 @@ public class PredictiveClusterInducer<E> {
 
 		return null; //tree;
 
+	}
+
+
+	private boolean stopcondition(PredictiveTree<OWLClassExpression, Model<E>> currentTree) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }
