@@ -3,6 +3,7 @@ package predictiveclustering;
 import java.io.File;
 import java.net.URI;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -34,7 +35,7 @@ public class KnowledgeBase {
 	private OWLClass[] allConcepts;
 	private OWLObjectProperty[] allRoles;
 	private OWLIndividual[] allExamples;
-	private Map<OWLDataPropertyExpression, Set<OWLLiteral>> dataPropertyValues;
+	private Map<OWLIndividual,Map<OWLDataPropertyExpression, Set<OWLLiteral>>> dataPropertyValues = new HashMap<OWLIndividual, Map<OWLDataPropertyExpression,Set<OWLLiteral>>>();
 
 
 
@@ -122,13 +123,13 @@ public class KnowledgeBase {
 
 
 
-	public Map<OWLDataPropertyExpression, Set<OWLLiteral>> getDataPropertyValues() {
+	public Map<OWLIndividual,Map<OWLDataPropertyExpression, Set<OWLLiteral>>> getDataPropertyValues() {
 		return dataPropertyValues;
 	}
 
 
 
-	public void setDataPropertyValues(Map<OWLDataPropertyExpression, Set<OWLLiteral>> dataPropertyValues) {
+	public void setDataPropertyValues(Map<OWLIndividual,Map<OWLDataPropertyExpression, Set<OWLLiteral>>> dataPropertyValues) {
 		this.dataPropertyValues = dataPropertyValues;
 	}
 
@@ -198,6 +199,7 @@ public class KnowledgeBase {
 		for(OWLNamedIndividual ind : indList) {
 			allExamples[i++] = ind;   
 			Map<OWLDataPropertyExpression, Set<OWLLiteral>> dataPropertyValues = ind.getDataPropertyValues(ontology);
+			this.dataPropertyValues.put(ind, dataPropertyValues);
 			//Collection<Set<OWLLiteral>> values = dataPropertyValues.values();
 //			for (Set<OWLLiteral> set : values) {
 //				for (OWLLiteral owlLiteral : set) {

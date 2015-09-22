@@ -68,8 +68,6 @@ public class PredictiveClusterInducer<E> {
 //
 		while (!stack.isEmpty()){
 			
-			
-			
 			Couple<PredictiveTree<OWLClassExpression, Model<E>>, Npla<SortedSet<OWLIndividual>, SortedSet<OWLIndividual>, SortedSet<OWLIndividual>, Integer, Double, Double>> pop = stack.pop();
 			PredictiveTree<OWLClassExpression, Model<E>> currentTree = pop.getFirstElement();
 			// generate the candidate concepts
@@ -90,7 +88,10 @@ public class PredictiveClusterInducer<E> {
 			Split.split(bestDescription, reasoner.getManager().getOWLDataFactory(), reasoner, posExs, negExs, undExs, posExsT, negExsT, undExsT, posExsF, negExsF, undExsF); 
 			
 			}
-			
+			else{
+				logger.info("not implemented yet!");
+				
+			}
 			
 			
 		}
