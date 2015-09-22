@@ -7,6 +7,9 @@ import java.util.Stack;
 import java.util.TreeSet;
 
 
+
+
+import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataProperty;
@@ -22,7 +25,8 @@ import predictiveclustering.utils.Split;
 
 public class PredictiveClusterInducer<K,E> {
 	private PelletReasoner reasoner;
-	private PredictiveTree<K,E> tree; 
+	private PredictiveTree<K,E> tree;
+	private int MAXDEPTH; 
 	private static boolean regressionTask= true;
 
 	private static Logger logger = LoggerFactory.getLogger(PredictiveClusterInducer.class);
@@ -49,95 +53,96 @@ public class PredictiveClusterInducer<K,E> {
 
 		//Model<K,E>[] m= models.toArray(new Model[models.size()]);
 		// model for each element
-		  Model priorModel1= computeModel(posExs, negExs, undExs, models, regressionTask);
-
-		
-			logger.info("Learning problem\t p:"+posExs.size()+"\t n:"+negExs.size()+"\t u:"+undExs.size()+"\t prPos:"+prPos+"\t prNeg:"+prNeg+"\n");
-			//		//ArrayList<OWLIndividual> truePos= posExs;
-			//		//ArrayList<OWLIndividual> trueNeg= negExs;
-			int depth=0;
-			DLTreesRefinementOperator dlTreesRefinementOperator =  new DLTreesRefinementOperator(reasoner,8);
-			//       
-			// set the heuristic for tree induction
-			TreeInductionHeuristics heuristic= new TreeInductionHeuristics();
-			heuristic.setReasoner(reasoner);
+		Model priorModel1= computeModel(posExs, negExs, undExs, models, regressionTask);
 
 
-			Npla<SortedSet<OWLIndividual>, SortedSet<OWLIndividual>, SortedSet<OWLIndividual>, Integer, Double, Double> examples = new Npla<SortedSet<OWLIndividual>,SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double>(posExs, negExs, undExs,depth, prPos , prNeg);
-			PredictiveTree<OWLClassExpression,Model<K,E>> tree = new PredictiveTree<OWLClassExpression,Model<K,E>>(); // new (sub)tree
-			Stack<Couple<PredictiveTree<OWLClassExpression,Model<K,E>>,Npla<SortedSet<OWLIndividual>,SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double>>> stack= new Stack<Couple<PredictiveTree<OWLClassExpression,Model<K,E>>,Npla<SortedSet<OWLIndividual>, SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double>>>();
-			Couple<PredictiveTree<OWLClassExpression,Model<K,E>>,Npla<SortedSet<OWLIndividual>,SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double>> toInduce= new Couple<PredictiveTree<OWLClassExpression,Model<K,E>>,Npla<SortedSet<OWLIndividual>,SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double>>();
-			toInduce.setFirstElement(tree);
-			toInduce.setSecondElement(examples);
-			stack.push(toInduce);
-			
-					while (!stack.isEmpty()){
-						
-						Couple<PredictiveTree<OWLClassExpression, Model<K,E>>, Npla<SortedSet<OWLIndividual>, SortedSet<OWLIndividual>, SortedSet<OWLIndividual>, Integer, Double, Double>> pop = stack.pop();
-						PredictiveTree<OWLClassExpression, Model<K,E>> currentTree = pop.getFirstElement();
-						// generate the candidate concepts
-						Npla<SortedSet<OWLIndividual>, SortedSet<OWLIndividual>, SortedSet<OWLIndividual>, Integer, Double, Double> secondElement = pop.getSecondElement();
-						depth=secondElement.getFourth();
-						posExs=secondElement.getFirst();
-						negExs=secondElement.getSecond();
-						undExs=secondElement.getThird();
-				
+		logger.info("Learning problem\t p:"+posExs.size()+"\t n:"+negExs.size()+"\t u:"+undExs.size()+"\t prPos:"+prPos+"\t prNeg:"+prNeg+"\n");
+		//		//ArrayList<OWLIndividual> truePos= posExs;
+		//		//ArrayList<OWLIndividual> trueNeg= negExs;
+		int depth=0;
+		DLTreesRefinementOperator dlTreesRefinementOperator =  new DLTreesRefinementOperator(reasoner,8);
+		//       
+		// set the heuristic for tree induction
+		TreeInductionHeuristics heuristic= new TreeInductionHeuristics();
+		heuristic.setReasoner(reasoner);
+
+
+		Npla<SortedSet<OWLIndividual>, SortedSet<OWLIndividual>, SortedSet<OWLIndividual>, Integer, Double, Double> examples = new Npla<SortedSet<OWLIndividual>,SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double>(posExs, negExs, undExs,depth, prPos , prNeg);
+		PredictiveTree<OWLClassExpression,Model<K,E>> tree = new PredictiveTree<OWLClassExpression,Model<K,E>>(); // new (sub)tree
+		Stack<Couple<PredictiveTree<OWLClassExpression,Model<K,E>>,Npla<SortedSet<OWLIndividual>,SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double>>> stack= new Stack<Couple<PredictiveTree<OWLClassExpression,Model<K,E>>,Npla<SortedSet<OWLIndividual>, SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double>>>();
+		Couple<PredictiveTree<OWLClassExpression,Model<K,E>>,Npla<SortedSet<OWLIndividual>,SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double>> toInduce= new Couple<PredictiveTree<OWLClassExpression,Model<K,E>>,Npla<SortedSet<OWLIndividual>,SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double>>();
+		toInduce.setFirstElement(tree);
+		toInduce.setSecondElement(examples);
+		stack.push(toInduce);
+
+		while (!stack.isEmpty()){
+
+			Couple<PredictiveTree<OWLClassExpression, Model<K,E>>, Npla<SortedSet<OWLIndividual>, SortedSet<OWLIndividual>, SortedSet<OWLIndividual>, Integer, Double, Double>> pop = stack.pop();
+			PredictiveTree<OWLClassExpression, Model<K,E>> currentTree = pop.getFirstElement();
+			// generate the candidate concepts
+			Npla<SortedSet<OWLIndividual>, SortedSet<OWLIndividual>, SortedSet<OWLIndividual>, Integer, Double, Double> secondElement = pop.getSecondElement();
+			depth=secondElement.getFourth();
+			posExs=secondElement.getFirst();
+			negExs=secondElement.getSecond();
+			undExs=secondElement.getThird();
+
 			//			
 			//			
-						if ((posExs.size()==0) && (negExs.size()==0) && (undExs.size()==0)){
-							
-							
-							
-						}
-						else{
-						Set<OWLClassExpression> refinements = dlTreesRefinementOperator.refine(null,posExs, negExs); // neg exs will be empty
-						// for each candidate computes the local models if it exists
-						OWLClassExpression[] ref= refinements.toArray(new OWLClassExpression[refinements.size()]);
-						OWLClassExpression bestDescription= heuristic.selectBestConcept(ref, posExs, negExs, undExs, 0, 0);
-						
-						SortedSet<OWLIndividual> negExsF = new TreeSet<OWLIndividual>();
-						SortedSet<OWLIndividual> undExsT = new TreeSet<OWLIndividual>();
-						SortedSet<OWLIndividual> undExsF = new TreeSet<OWLIndividual>();
-						SortedSet<OWLIndividual> posExsF = new TreeSet<OWLIndividual>();
-						SortedSet<OWLIndividual> posExsT = new TreeSet<OWLIndividual>();
-						SortedSet<OWLIndividual> negExsT = new TreeSet<OWLIndividual>();
-						Split.split(bestDescription, reasoner.getManager().getOWLDataFactory(), reasoner, posExs, negExs, undExs, posExsT, negExsT, undExsT, posExsF, negExsF, undExsF); 
-						
-						PredictiveTree<OWLClassExpression, Model<K,E>> posTree= new PredictiveTree<OWLClassExpression, Model<K,E>>();
-						PredictiveTree<OWLClassExpression, Model<K,E>> negTree= new PredictiveTree<OWLClassExpression, Model<K,E>>(); // recursive calls simulation
-						currentTree.setPosTree(posTree);
-						currentTree.setNegTree(negTree);
-						Npla<SortedSet<OWLIndividual>, SortedSet<OWLIndividual>, SortedSet<OWLIndividual>, Integer, Double, Double> npla1 = new Npla<SortedSet<OWLIndividual>,SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double>(posExsT, negExsT, undExsT, (depth+1), 0.0, 0.0);
-						Npla<SortedSet<OWLIndividual>,SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double> npla2 = new Npla<SortedSet<OWLIndividual>,SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double>(posExsF, negExsF, undExsF, (depth+1), 0.0, 0.0);
-						Couple<PredictiveTree<OWLClassExpression, Model<K,E>>,Npla<SortedSet<OWLIndividual>,SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double>> pos= new Couple<PredictiveTree<OWLClassExpression, Model<K,E>>,Npla<SortedSet<OWLIndividual>,SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double>>();
-						pos.setFirstElement(posTree);
-						pos.setSecondElement(npla1);
-			
-						// negative branch
-						Couple<PredictiveTree<OWLClassExpression, Model<K,E>>,Npla<SortedSet<OWLIndividual>,SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double>> neg= new Couple<PredictiveTree<OWLClassExpression, Model<K,E>>,Npla<SortedSet<OWLIndividual>,SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double>>();
-						neg.setFirstElement(negTree);
-						neg.setSecondElement(npla2);
-						stack.push(neg);
-						stack.push(pos);
-				
-						
-						}
-			//else{
-			//logger.info("not implemented yet!");
+			if ((posExs.size()==0) && (negExs.size()==0) && (undExs.size()==0)){
 
-			// combine the models of the leaves reaching  the node
+				currentTree.setRoot(null, priorModel1);
 
-			// use a default prior model computed w.r.t.  the training set
+			}else if (depth<= MAXDEPTH){
+				Model localModel2= computeModel(posExs, negExs, undExs, models, regressionTask);
+				currentTree.setRoot(null, localModel2);
 
-			//}
+			}
+			else{
+				Set<OWLClassExpression> refinements = dlTreesRefinementOperator.refine(null,posExs, negExs); // neg exs will be empty
+				// for each candidate computes the local models if it exists
+				OWLClassExpression[] ref= refinements.toArray(new OWLClassExpression[refinements.size()]);
+				OWLClassExpression bestDescription= heuristic.selectBestConcept(ref, posExs, negExs, undExs, 0, 0);
+				Model localModel2= computeModel(posExs, negExs, undExs, models, regressionTask);
+				SortedSet<OWLIndividual> negExsF = new TreeSet<OWLIndividual>();
+				SortedSet<OWLIndividual> undExsT = new TreeSet<OWLIndividual>();
+				SortedSet<OWLIndividual> undExsF = new TreeSet<OWLIndividual>();
+				SortedSet<OWLIndividual> posExsF = new TreeSet<OWLIndividual>();
+				SortedSet<OWLIndividual> posExsT = new TreeSet<OWLIndividual>();
+				SortedSet<OWLIndividual> negExsT = new TreeSet<OWLIndividual>();
+				Split.split(bestDescription, reasoner.getManager().getOWLDataFactory(), reasoner, posExs, negExs, undExs, posExsT, negExsT, undExsT, posExsF, negExsF, undExsF); 
 
 
-					}
+				// set the root
 
-			//	return tree;
-			return null;
+				currentTree.setRoot(bestDescription, localModel2);
+
+				PredictiveTree<OWLClassExpression, Model<K,E>> posTree= new PredictiveTree<OWLClassExpression, Model<K,E>>();
+				PredictiveTree<OWLClassExpression, Model<K,E>> negTree= new PredictiveTree<OWLClassExpression, Model<K,E>>(); // recursive calls simulation
+				currentTree.setPosTree(posTree);
+				currentTree.setNegTree(negTree);
+				Npla<SortedSet<OWLIndividual>, SortedSet<OWLIndividual>, SortedSet<OWLIndividual>, Integer, Double, Double> npla1 = new Npla<SortedSet<OWLIndividual>,SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double>(posExsT, negExsT, undExsT, (depth+1), 0.0, 0.0);
+				Npla<SortedSet<OWLIndividual>,SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double> npla2 = new Npla<SortedSet<OWLIndividual>,SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double>(posExsF, negExsF, undExsF, (depth+1), 0.0, 0.0);
+				Couple<PredictiveTree<OWLClassExpression, Model<K,E>>,Npla<SortedSet<OWLIndividual>,SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double>> pos= new Couple<PredictiveTree<OWLClassExpression, Model<K,E>>,Npla<SortedSet<OWLIndividual>,SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double>>();
+				pos.setFirstElement(posTree);
+				pos.setSecondElement(npla1);
+
+				// negative branch
+				Couple<PredictiveTree<OWLClassExpression, Model<K,E>>,Npla<SortedSet<OWLIndividual>,SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double>> neg= new Couple<PredictiveTree<OWLClassExpression, Model<K,E>>,Npla<SortedSet<OWLIndividual>,SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double>>();
+				neg.setFirstElement(negTree);
+				neg.setSecondElement(npla2);
+				stack.push(neg);
+				stack.push(pos);
+
+
+			}
+
 
 		}
+
+		//	return tree;
+		return null;
+
+	}
 
 
 	private  Model computeModel(SortedSet<OWLIndividual> posExs, SortedSet<OWLIndividual> negExs,
@@ -159,16 +164,57 @@ public class PredictiveClusterInducer<K,E> {
 		// model.getClass();
 		Model model = models.get(0);
 		if (this.regressionTask)
-			 return ModelUtils.combineModels(model);
-		
-	
+			return ModelUtils.combineModels(model);
+
+
 		return null;
 	}
-	
+
 
 	private boolean stopcondition(PredictiveTree<OWLClassExpression, Model<K,E>> currentTree) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
+
+	public  Model classifyExample(OWLIndividual indTestEx, PredictiveTree tree, OWLDataFactory dataFactory) {
+
+
+		Stack<PredictiveTree<E, Model>> stack= new Stack<PredictiveTree<E, Model>>();
+		//OWLDataFactory dataFactory = kb.getDataFactory();
+		stack.add(tree);
+		Model result=null;
+		boolean stop=false;
+		while(!stack.isEmpty() && !stop){
+			PredictiveTree currentTree= stack.pop();
+
+			OWLClassExpression rootClass = (OWLClassExpression)currentTree.getRoot().getT();
+
+			//			System.out.println("Root class: "+ rootClass);
+			if (rootClass==null){
+				stop=true;
+				result=  (Model)(currentTree.getRoot()).getModel();
+
+			}
+			else {
+
+				OWLClassAssertionAxiom owlClassAssertionAxiom = dataFactory.getOWLClassAssertionAxiom(rootClass, indTestEx);
+				OWLClassAssertionAxiom negOwlClassAssertionAxiom = dataFactory.getOWLClassAssertionAxiom(dataFactory.getOWLObjectComplementOf(rootClass), indTestEx);
+				if (reasoner.isEntailed(owlClassAssertionAxiom))
+					stack.push(currentTree.getPosSubTree());
+				else if (reasoner.isEntailed(negOwlClassAssertionAxiom))
+					stack.push(currentTree.getNegSubTree());
+				else {
+					stop=true;
+					result=  (Model)(currentTree.getRoot()).getModel();
+
+				}
+			}
+
+		}
+		
+
+	return result;
+
+}
 }
