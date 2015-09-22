@@ -28,7 +28,7 @@ import predictiveclustering.utils.Couple;
 import predictiveclustering.utils.Npla;
 import predictiveclustering.utils.Split;
 
-public class PredictiveClusterInducer<E> {
+public class PredictiveClusterInducer<K,E> {
 	private PelletReasoner reasoner;
 	
 	private static Logger logger = LoggerFactory.getLogger(PredictiveClusterInducer.class);
@@ -44,7 +44,7 @@ public class PredictiveClusterInducer<E> {
 
 	
 	
-	public PredictiveTree<OWLClassExpression,Model<E>> induceTree(SortedSet<OWLIndividual> posExs, SortedSet<OWLIndividual> negExs, SortedSet<OWLIndividual> undExs) {		
+	public PredictiveTree<OWLClassExpression,Model<K,E>> induceTree(SortedSet<OWLIndividual> posExs, SortedSet<OWLIndividual> negExs, SortedSet<OWLIndividual> undExs) {		
 		Double prPos =0.5;
 		Double prNeg=0.5;
 		logger.info("Learning problem\t p:"+posExs.size()+"\t n:"+negExs.size()+"\t u:"+undExs.size()+"\t prPos:"+prPos+"\t prNeg:"+prNeg+"\n");
@@ -59,17 +59,17 @@ public class PredictiveClusterInducer<E> {
 		
 		
 		Npla<SortedSet<OWLIndividual>, SortedSet<OWLIndividual>, SortedSet<OWLIndividual>, Integer, Double, Double> examples = new Npla<SortedSet<OWLIndividual>,SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double>(posExs, negExs, undExs,depth, prPos , prNeg);
-		PredictiveTree<OWLClassExpression,Model<E>> tree = new PredictiveTree<OWLClassExpression,Model<E>>(); // new (sub)tree
-		Stack<Couple<PredictiveTree<OWLClassExpression,Model<E>>,Npla<SortedSet<OWLIndividual>,SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double>>> stack= new Stack<Couple<PredictiveTree<OWLClassExpression,Model<E>>,Npla<SortedSet<OWLIndividual>, SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double>>>();
-		Couple<PredictiveTree<OWLClassExpression,Model<E>>,Npla<SortedSet<OWLIndividual>,SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double>> toInduce= new Couple<PredictiveTree<OWLClassExpression,Model<E>>,Npla<SortedSet<OWLIndividual>,SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double>>();
+		PredictiveTree<OWLClassExpression,Model<K,E>> tree = new PredictiveTree<OWLClassExpression,Model<K,E>>(); // new (sub)tree
+		Stack<Couple<PredictiveTree<OWLClassExpression,Model<K,E>>,Npla<SortedSet<OWLIndividual>,SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double>>> stack= new Stack<Couple<PredictiveTree<OWLClassExpression,Model<K,E>>,Npla<SortedSet<OWLIndividual>, SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double>>>();
+		Couple<PredictiveTree<OWLClassExpression,Model<K,E>>,Npla<SortedSet<OWLIndividual>,SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double>> toInduce= new Couple<PredictiveTree<OWLClassExpression,Model<K,E>>,Npla<SortedSet<OWLIndividual>,SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double>>();
 		toInduce.setFirstElement(tree);
 		toInduce.setSecondElement(examples);
 		stack.push(toInduce);
 //
 		while (!stack.isEmpty()){
 			
-			Couple<PredictiveTree<OWLClassExpression, Model<E>>, Npla<SortedSet<OWLIndividual>, SortedSet<OWLIndividual>, SortedSet<OWLIndividual>, Integer, Double, Double>> pop = stack.pop();
-			PredictiveTree<OWLClassExpression, Model<E>> currentTree = pop.getFirstElement();
+			Couple<PredictiveTree<OWLClassExpression, Model<K,E>>, Npla<SortedSet<OWLIndividual>, SortedSet<OWLIndividual>, SortedSet<OWLIndividual>, Integer, Double, Double>> pop = stack.pop();
+			PredictiveTree<OWLClassExpression, Model<K,E>> currentTree = pop.getFirstElement();
 			// generate the candidate concepts
 			
 			if (!stopcondition(currentTree)){
@@ -101,7 +101,7 @@ public class PredictiveClusterInducer<E> {
 	}
 
 
-	private boolean stopcondition(PredictiveTree<OWLClassExpression, Model<E>> currentTree) {
+	private boolean stopcondition(PredictiveTree<OWLClassExpression, Model<K,E>> currentTree) {
 		// TODO Auto-generated method stub
 		return false;
 	}
