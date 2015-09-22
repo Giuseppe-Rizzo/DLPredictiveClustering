@@ -9,7 +9,7 @@ import org.semanticweb.owlapi.model.OWLDataPropertyExpression;
 import org.semanticweb.owlapi.model.OWLIndividual;
 
 public class ModelUtils<K,E> {
-	
+	//<owl individual, <property, filler>
 	private static Map<OWLIndividual, Model> models = new HashMap<OWLIndividual, Model>(); // it contains associated to the individuals
 	
 	public static <K,E> Model<K,E> getModels(OWLIndividual ind){
@@ -49,9 +49,5 @@ public class ModelUtils<K,E> {
 		
 		
 	} 
-	
 
-	
-	
-	
 }
