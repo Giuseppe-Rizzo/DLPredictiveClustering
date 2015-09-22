@@ -8,8 +8,6 @@ import org.semanticweb.owlapi.model.OWLDataPropertyExpression;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
 
-import antlr.debug.NewLineEvent;
-
 public class RegressionModelLearning {
 
 	HashMap<OWLIndividual,Model<OWLDataPropertyExpression, Double>> mapping; //= new HashMap<OWLIndividual, Model<Double>>(); 
