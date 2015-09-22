@@ -7,15 +7,6 @@ import java.util.Stack;
 import java.util.TreeSet;
 
 
-
-
-
-
-
-
-
-
-
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLIndividual;
@@ -30,6 +21,7 @@ import predictiveclustering.utils.Split;
 
 public class PredictiveClusterInducer<K,E> {
 	private PelletReasoner reasoner;
+	private PredictiveTree<K,E> tree; 
 	
 	private static Logger logger = LoggerFactory.getLogger(PredictiveClusterInducer.class);
 
@@ -86,6 +78,27 @@ public class PredictiveClusterInducer<K,E> {
 			
 			SortedSet<OWLIndividual> negExsT = new TreeSet<OWLIndividual>();
 			Split.split(bestDescription, reasoner.getManager().getOWLDataFactory(), reasoner, posExs, negExs, undExs, posExsT, negExsT, undExsT, posExsF, negExsF, undExsF); 
+			
+			PredictiveTree<OWLClassExpression, Model<K,E>> posTree= new PredictiveTree<OWLClassExpression, Model<K,E>>();
+			PredictiveTree<OWLClassExpression, Model<K,E>> negTree= new PredictiveTree<OWLClassExpression, Model<K,E>>(); // recursive calls simulation
+			currentTree.setPosTree(posTree);
+			currentTree.setNegTree(negTree);
+			Npla<SortedSet<OWLIndividual>, SortedSet<OWLIndividual>, SortedSet<OWLIndividual>, Integer, Double, Double> npla1 = new Npla<SortedSet<OWLIndividual>,SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double>(posExsT, negExsT, undExsT, (depth+1), 0.0, 0.0);
+			Npla<SortedSet<OWLIndividual>,SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double> npla2 = new Npla<SortedSet<OWLIndividual>,SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double>(posExsF, negExsF, undExsF, (depth+1), 0.0, 0.0);
+			Couple<PredictiveTree<OWLClassExpression, Model<K,E>>,Npla<SortedSet<OWLIndividual>,SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double>> pos= new Couple<PredictiveTree<OWLClassExpression, Model<K,E>>,Npla<SortedSet<OWLIndividual>,SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double>>();
+			pos.setFirstElement(posTree);
+			pos.setSecondElement(npla1);
+
+			// negative branch
+			Couple<PredictiveTree<OWLClassExpression, Model<K,E>>,Npla<SortedSet<OWLIndividual>,SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double>> neg= new Couple<PredictiveTree<OWLClassExpression, Model<K,E>>,Npla<SortedSet<OWLIndividual>,SortedSet<OWLIndividual>,SortedSet<OWLIndividual>, Integer, Double, Double>>();
+			neg.setFirstElement(negTree);
+			neg.setSecondElement(npla2);
+			stack.push(neg);
+			stack.push(pos);
+
+			
+			
+			
 			
 			}
 			else{
