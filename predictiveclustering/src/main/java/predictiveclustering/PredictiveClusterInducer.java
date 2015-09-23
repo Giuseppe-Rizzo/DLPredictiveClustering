@@ -26,7 +26,7 @@ import predictiveclustering.utils.Split;
 public class PredictiveClusterInducer<K,E> {
 	private PelletReasoner reasoner;
 	private PredictiveTree<K,E> tree;
-	private int MAXDEPTH; 
+	private int MAXDEPTH= 7; 
 	private static boolean regressionTask= true;
 
 	private static Logger logger = LoggerFactory.getLogger(PredictiveClusterInducer.class);
