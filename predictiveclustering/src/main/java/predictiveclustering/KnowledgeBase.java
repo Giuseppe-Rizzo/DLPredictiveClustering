@@ -165,6 +165,7 @@ public class KnowledgeBase {
 
 
 		reasoner = new PelletReasoner(ontology, BufferingMode.NON_BUFFERING);
+		
 
 //		reasoner.getKB().realize();
 		System.out.println("\nClasses\n-------");

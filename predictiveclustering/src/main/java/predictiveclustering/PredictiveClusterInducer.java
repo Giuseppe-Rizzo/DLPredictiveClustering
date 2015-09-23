@@ -1,10 +1,12 @@
 package predictiveclustering;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.Stack;
 import java.util.TreeSet;
+
 
 
 
@@ -42,9 +44,9 @@ public class PredictiveClusterInducer<K,E> {
 
 
 
-	public <K,E> PredictiveTree<OWLClassExpression,Model<K,E>> induceTree(SortedSet<OWLIndividual> posExs, SortedSet<OWLIndividual> negExs, SortedSet<OWLIndividual> undExs, Model<K,E> priorModel) {		
+	public <K,E> PredictiveTree<OWLClassExpression,Model<K,E>> induceTree(SortedSet<OWLIndividual> posExs, SortedSet<OWLIndividual> negExs, SortedSet<OWLIndividual> undExs, Collection collection) {		
 		// K: data properties
-
+System.out.println("Learning start");
 		Double prPos =0.5;
 		Double prNeg=0.5;
 		// combination of the models of the training individuals
@@ -54,7 +56,7 @@ public class PredictiveClusterInducer<K,E> {
 		//Model<K,E>[] m= models.toArray(new Model[models.size()]);
 		// model for each element
 		Model priorModel1= computeModel(posExs, negExs, undExs, models, regressionTask);
-
+		System.out.println("Eccomi qua---");
 
 		logger.info("Learning problem\t p:"+posExs.size()+"\t n:"+negExs.size()+"\t u:"+undExs.size()+"\t prPos:"+prPos+"\t prNeg:"+prNeg+"\n");
 		//		//ArrayList<OWLIndividual> truePos= posExs;
@@ -77,6 +79,7 @@ public class PredictiveClusterInducer<K,E> {
 
 		while (!stack.isEmpty()){
 
+			
 			Couple<PredictiveTree<OWLClassExpression, Model<K,E>>, Npla<SortedSet<OWLIndividual>, SortedSet<OWLIndividual>, SortedSet<OWLIndividual>, Integer, Double, Double>> pop = stack.pop();
 			PredictiveTree<OWLClassExpression, Model<K,E>> currentTree = pop.getFirstElement();
 			// generate the candidate concepts
@@ -89,16 +92,19 @@ public class PredictiveClusterInducer<K,E> {
 			//			
 			//			
 			if ((posExs.size()==0) && (negExs.size()==0) && (undExs.size()==0)){
-
+				
 				currentTree.setRoot(null, priorModel1);
+				
 
-			}else if (depth<= MAXDEPTH){
+			}else if (depth>MAXDEPTH){
 				Model localModel2= computeModel(posExs, negExs, undExs, models, regressionTask);
 				currentTree.setRoot(null, localModel2);
+				
 
 			}
 			else{
 				Set<OWLClassExpression> refinements = dlTreesRefinementOperator.refine(null,posExs, negExs); // neg exs will be empty
+								
 				// for each candidate computes the local models if it exists
 				OWLClassExpression[] ref= refinements.toArray(new OWLClassExpression[refinements.size()]);
 				OWLClassExpression bestDescription= heuristic.selectBestConcept(ref, posExs, negExs, undExs, 0, 0);

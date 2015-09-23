@@ -61,7 +61,6 @@ public class DLTreesRefinementOperator{
 	//	
 	
 	public DLTreesRefinementOperator() {
-		super();
 
 		generator= new Random(2);
 	}
@@ -87,7 +86,7 @@ public class DLTreesRefinementOperator{
 			
 		}
 		
-		//this.beam=beam; // set the maximum number of candidates that can be generated
+		this.beam=beam; // set the maximum number of candidates that can be generated
 		
 		generator= new Random(2);
 
@@ -165,7 +164,7 @@ public class DLTreesRefinementOperator{
 
 		logger.info("Generating node concepts ");
 		TreeSet<OWLClassExpression> rConcepts = new TreeSet<OWLClassExpression>();
-
+		System.out.println("Generating node concepts ");
 		OWLClassExpression newConcept=null;
 		boolean emptyIntersection;
 		for (int c=0; c<beam; c++) {
@@ -174,9 +173,9 @@ public class DLTreesRefinementOperator{
 				emptyIntersection =  false;
 				//System.out.println("Before the try");
 				//					try{
-				//System.out.println("---------->");
+				System.out.println("---------->");
 				newConcept = getRandomConcept();
-				logger.info(c+"-  New Concept: "+newConcept);
+				System.out.println(c+"-  New Concept: "+newConcept);
 				NodeSet<OWLNamedIndividual> individuals;
 
 				individuals = (r.getInstances(newConcept, false));

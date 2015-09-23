@@ -28,6 +28,10 @@ public class Model<P,E> {
 		mapping.put(key, value);
 	}	
 	
+	public String toString(){
+		
+		return mapping.toString();
+	}
 	
 	
 
