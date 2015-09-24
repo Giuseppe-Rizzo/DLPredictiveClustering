@@ -195,7 +195,7 @@ System.out.println("Learning start");
 		boolean stop=false;
 		while(!stack.isEmpty() && !stop){
 			PredictiveTree currentTree= stack.pop();
-			System.out.println("--"+(currentTree==null));
+			
 			
 			OWLClassExpression rootClass = (OWLClassExpression)currentTree.getRoot().getT();
 			System.out.println(rootClass);
@@ -212,13 +212,13 @@ System.out.println("Learning start");
 				OWLClassAssertionAxiom negOwlClassAssertionAxiom = dataFactory.getOWLClassAssertionAxiom(dataFactory.getOWLObjectComplementOf(rootClass), indTestEx);
 				if (reasoner.isEntailed(owlClassAssertionAxiom))
 					stack.push(currentTree.getPosSubTree());
-				else if (reasoner.isEntailed(negOwlClassAssertionAxiom))
+				else //if (reasoner.isEntailed(negOwlClassAssertionAxiom))
 					stack.push(currentTree.getNegSubTree());
-				else {
-					stop=true;
-					result=  (Model)(currentTree.getRoot()).getModel();
+			//	else {
+				//	stop=true;
+				//	result=  (Model)(currentTree.getRoot()).getModel();
 
-				}
+				//}
 			}
 
 		}

@@ -37,50 +37,50 @@ public class Evaluation {
 		dataPropertyValues = kb.getDataPropertyValues();
 		// initialization of properties
 		Set<OWLOntology> ontologies = kb.getManager().getOntologies();
-  	   for (OWLOntology owlOntology : ontologies) {
-  		   System.out.println("Ontology: "+owlOntology);
-  		   queries = owlOntology.getDataPropertiesInSignature();
+		for (OWLOntology owlOntology : ontologies) {
+			System.out.println("Ontology: "+owlOntology);
+			queries = owlOntology.getDataPropertiesInSignature();
 
-		
-		allExamples=kb.getAllExamples();
-	     for (OWLIndividual ind: allExamples){
-	    	 Model<OWLDataPropertyExpression, Double> model= new Model<OWLDataPropertyExpression, Double>(); 
-	    	 // access to the pair (property, value)  and conversion from the literal to double
-	    	 for (OWLDataProperty query : queries) {
-	    		 Set<OWLLiteral> dataPropertyValues2 = ind.getDataPropertyValues(query, owlOntology);
-	    		 	// conversion step
-	    		 // number of role <=1
-	    		 for (OWLLiteral owlLiteral : dataPropertyValues2) {
-	    		System.out.println("Literal: "+ owlLiteral);
-	    			 //if (owlLiteral.isDouble()){
-	    			 double v = owlLiteral.parseDouble();
-	    			 System.out.println("-->"+v);
-	    			 model.setValues(query, v);
-	    			 //}
-	    			 //else if (owlLiteral.isFloat()){
-		    			// double v = owlLiteral.parseFloat();
-		    			 //System.out.println("-->"+v);
-		    			 //model.setValues(query, v);
-		    			 //}
-	    			 //else if (owlLiteral.isInteger()){
-		    			// double v = 0.0+(owlLiteral.parseInteger());
-		    			 //System.out.println("--->"+v);
-		    			 //model.setValues(query, v);
-		    		//}
-	    		 }
-	    		 ModelUtils.setModels(ind, model); // add to set of predictions
-	    		 
-	    	 } 		 
-	    	 
+
+			allExamples=kb.getAllExamples();
+			for (OWLIndividual ind: allExamples){
+				Model<OWLDataPropertyExpression, Double> model= new Model<OWLDataPropertyExpression, Double>(); 
+				// access to the pair (property, value)  and conversion from the literal to double
+				for (OWLDataProperty query : queries) {
+					Set<OWLLiteral> dataPropertyValues2 = ind.getDataPropertyValues(query, owlOntology);
+					// conversion step
+					// number of role <=1
+					for (OWLLiteral owlLiteral : dataPropertyValues2) {
+						System.out.println("Literal: "+ owlLiteral);
+						//if (owlLiteral.isDouble()){
+						double v = owlLiteral.parseDouble();
+						System.out.println("-->"+v);
+						model.setValues(query, v);
+						//}
+						//else if (owlLiteral.isFloat()){
+						// double v = owlLiteral.parseFloat();
+						//System.out.println("-->"+v);
+						//model.setValues(query, v);
+						//}
+						//else if (owlLiteral.isInteger()){
+						// double v = 0.0+(owlLiteral.parseInteger());
+						//System.out.println("--->"+v);
+						//model.setValues(query, v);
+						//}
+					}
+					ModelUtils.setModels(ind, model); // add to set of predictions
+
+				} 		 
+
 			}
-			
-	     
-	     
-	     } 
-	    	 
-	
-		
-		
+
+
+
+		} 
+
+
+
+
 		//System.out.println("No individual"+allExamples.length);
 	}
 
@@ -106,72 +106,115 @@ public class Evaluation {
 				trainingExsSet.add(e);
 				//System.out.println(r+"--"+ModelUtils.getModels(e));
 				trainingPredictions.put(e, ModelUtils.getModels(e));
-				
+
 			}
 			//
 			for (int r=0; r<allExamples.length; r++) {
 				if (! trainingExsSet.contains(allExamples[r])) 
 					testingExsSet.add(allExamples[r]);
 			}			
+
+			System.out.println("Training set: "+ trainingExsSet);
+			System.out.println("Testing set: "+ testingExsSet);
+
+			PredictiveClusterInducer inducer= new PredictiveClusterInducer(kb.getReasoner());
+			// a different configuration can be made for other tasks like the role prediction
+			SortedSet<OWLIndividual> posExs= new TreeSet<OWLIndividual>(trainingExsSet);
+			SortedSet<OWLIndividual> negExs= new TreeSet<OWLIndividual>();
+			SortedSet<OWLIndividual> undExs= new TreeSet<OWLIndividual>();
+
+			boolean consistent = kb.getReasoner().isConsistent();
+
+			//System.out.println(dataPropertyValues);
+
+
+			System.out.println(trainingPredictions.values());
+
+
+			PredictiveTree induceTree = inducer.induceTree(posExs, negExs, undExs, trainingPredictions.values());
+
+			//initialization mapping between individuals and prediction with respect to
+			Map<OWLDataPropertyExpression,Map<OWLIndividual,Double>> differences=new HashMap<OWLDataPropertyExpression,Map<OWLIndividual,Double>>();
+			for (OWLDataProperty prop : queries) {
+				Map<OWLIndividual, Double> tobeAdded= new HashMap<OWLIndividual, Double>();
+				differences.put(prop, tobeAdded);
+				
+				
+			}
+			for (OWLIndividual owlIndividual : testingExsSet) {
+				
+
+				Model classifyExample = inducer.classifyExample(owlIndividual, induceTree, kb.getDataFactory());
+				Model known = ModelUtils.getModels(owlIndividual);
+				System.out.println("Classifying individuals: "+owlIndividual+ " values:  Predicted"+classifyExample+" Original"+known+ "-"+known.getkeys().isEmpty());
+
+				//Map<OWLDataPropertyExpression, Double> tobeAdded= HashMap<OWLDataPropertyExpression, Double>();
+
+				for (OWLDataProperty query : queries) {
+					Map v= differences.get(query);
+					Double value2 = (Double)known.getValue(query); 
+					Double value = (Double)classifyExample.getValue(query);
+					if ((value2!=null)){
+						v.put(owlIndividual, value-value2); // memorize the difference between the predicted value and the original one; 
+						//System.out.println("To be Added: "+tobeAdded);
+					}
+					
+				}	
+			}
+			System.out.println("Differences: "+differences);
+			//			
 			
-		 System.out.println("Training set: "+ trainingExsSet);
-		 System.out.println("Testing set: "+ testingExsSet);
+			double num=0;
+			//			// compute the average w.r.t. a query
 			
-		PredictiveClusterInducer inducer= new PredictiveClusterInducer(kb.getReasoner());
-		// a different configuration can be made for other tasks like the role prediction
-		SortedSet<OWLIndividual> posExs= new TreeSet<OWLIndividual>(trainingExsSet);
-		SortedSet<OWLIndividual> negExs= new TreeSet<OWLIndividual>();
-		SortedSet<OWLIndividual> undExs= new TreeSet<OWLIndividual>();
-		
-		boolean consistent = kb.getReasoner().isConsistent();
-		
-		//System.out.println(dataPropertyValues);
-		
-		
-		System.out.println(trainingPredictions.values());
-		
-		
-		PredictiveTree induceTree = inducer.induceTree(posExs, negExs, undExs, trainingPredictions.values());
-		 
-		 
-		for (OWLIndividual owlIndividual : testingExsSet) {
+			//System.out.println("print for each query");
+			Double[] avgQueries= new Double[queries.size()];
+			int i=0;
+			for (OWLDataProperty query : queries) {
+				Double sum= 0.0;
+				Map<OWLIndividual,Double> addend = differences.get(query); // memorize the difference between the predicted value and the original one; 
+
+				System.out.println(query+" Addend "+addend);
+				Set<OWLIndividual> keySet = addend.keySet();
+				for (OWLIndividual key : keySet) {
+					Double double1 = addend.get(key);
+					sum+=(double1*double1);
+					
+				}
+				if (keySet.size()>0)
+					sum/=keySet.size();
+				else 
+					sum= null;
+				
+				avgQueries[i]= sum;
+				System.out.println("Query"+avgQueries[i]);
+				//if (addend!=null){
+				//sum+= addend*addend; // replace withs the square
+
+			}
 			
-			Model classifyExample = inducer.classifyExample(owlIndividual, induceTree, kb.getDataFactory());
-			System.out.println("Classifying individuals: "+owlIndividual+ " values: "+classifyExample);
+			Double avgModel=0.00;
+			int notnull=0;
+			for (int j = 0; j < avgQueries.length; j++) {
+				if (avgQueries[i]!=null){
+					avgModel+=avgQueries[i];
+				notnull++;	
+				}
+				
+			} 
+			
+			System.out.println("Average: "+(avgModel));
+			
+			
 		}
-			
-		}
-		
-		 //			// splitting in growing and pruning set (70-30 ratio)
-			//
-			//			Integer[] trainingExs = new Integer[0];
-			//			Integer[] testExs = new Integer[0];
-			//			trainingExs = trainingExsSet.toArray(trainingExs);
-			//			testExs = testingExsSet.toArray(testExs);
-			//			//			pruningSet=pruningExsSet.toArray(pruningSet);
-			//			ntestExs[f] = testExs.length;
-			//			//			System.setOut(new PrintStream("C:/Users/Utente/Documents/biopax.txt"));
-			//
-			//			// training phase: using all examples but those in the f-th partition
-			//			System.out.println("Training is starting...");
-			//
-			//
-			//			
-			//					int[][] results= kb.getClassMembershipResult();
-			//			
-			//		// training
-			//
-			//			// store model complexity evaluation
-			//			
-			//
-			//			}
-			//			System.out.println("End of Training.\n\n");
-			//
 
-		} // for f - fold look
+	
+
+
+} // for f - fold look
 
 
 
-	} // bootstrap DLDT induction	
+} // bootstrap DLDT induction	
 
 
