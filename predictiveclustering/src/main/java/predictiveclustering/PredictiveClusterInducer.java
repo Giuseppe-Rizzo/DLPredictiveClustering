@@ -123,7 +123,7 @@ System.out.println("Learning start");
 				// set the root
 
 				currentTree.setRoot(bestDescription, localModel2);
-
+				System.out.println("Installed description: "+currentTree.getRoot().getT());
 				PredictiveTree<OWLClassExpression, Model<K,E>> posTree= new PredictiveTree<OWLClassExpression, Model<K,E>>();
 				PredictiveTree<OWLClassExpression, Model<K,E>> negTree= new PredictiveTree<OWLClassExpression, Model<K,E>>(); // recursive calls simulation
 				currentTree.setPosTree(posTree);
@@ -147,8 +147,7 @@ System.out.println("Learning start");
 
 		}
 
-		//	return tree;
-		return null;
+		return tree;
 
 	}
 
@@ -196,8 +195,10 @@ System.out.println("Learning start");
 		boolean stop=false;
 		while(!stack.isEmpty() && !stop){
 			PredictiveTree currentTree= stack.pop();
-
+			System.out.println("--"+(currentTree==null));
+			
 			OWLClassExpression rootClass = (OWLClassExpression)currentTree.getRoot().getT();
+			System.out.println(rootClass);
 
 			//			System.out.println("Root class: "+ rootClass);
 			if (rootClass==null){

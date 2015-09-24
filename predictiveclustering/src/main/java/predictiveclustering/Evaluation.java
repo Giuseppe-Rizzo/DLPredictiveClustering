@@ -131,9 +131,17 @@ public class Evaluation {
 		System.out.println(trainingPredictions.values());
 		
 		
-		inducer.induceTree(posExs, negExs, undExs, trainingPredictions.values());
+		PredictiveTree induceTree = inducer.induceTree(posExs, negExs, undExs, trainingPredictions.values());
 		 
 		 
+		for (OWLIndividual owlIndividual : testingExsSet) {
+			
+			Model classifyExample = inducer.classifyExample(owlIndividual, induceTree, kb.getDataFactory());
+			System.out.println("Classifying individuals: "+owlIndividual+ " values: "+classifyExample);
+		}
+			
+		}
+		
 		 //			// splitting in growing and pruning set (70-30 ratio)
 			//
 			//			Integer[] trainingExs = new Integer[0];
@@ -166,4 +174,4 @@ public class Evaluation {
 
 	} // bootstrap DLDT induction	
 
-}
+
