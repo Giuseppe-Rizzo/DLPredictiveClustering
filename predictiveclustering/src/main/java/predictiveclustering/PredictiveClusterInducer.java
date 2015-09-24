@@ -56,7 +56,7 @@ System.out.println("Learning start");
 		//Model<K,E>[] m= models.toArray(new Model[models.size()]);
 		// model for each element
 		Model priorModel1= computeModel(posExs, negExs, undExs, models, regressionTask);
-		System.out.println("Eccomi qua---");
+		
 
 		logger.info("Learning problem\t p:"+posExs.size()+"\t n:"+negExs.size()+"\t u:"+undExs.size()+"\t prPos:"+prPos+"\t prNeg:"+prNeg+"\n");
 		//		//ArrayList<OWLIndividual> truePos= posExs;
@@ -94,11 +94,13 @@ System.out.println("Learning start");
 			if ((posExs.size()==0) && (negExs.size()==0) && (undExs.size()==0)){
 				
 				currentTree.setRoot(null, priorModel1);
+				System.out.println("Leaf: "+ priorModel1);
 				
 
 			}else if (depth>MAXDEPTH){
 				Model localModel2= computeModel(posExs, negExs, undExs, models, regressionTask);
 				currentTree.setRoot(null, localModel2);
+				System.out.println("Leaf: "+ localModel2);
 				
 
 			}
@@ -168,9 +170,10 @@ System.out.println("Learning start");
 			models.add(model);
 		}
 		// model.getClass();
-		Model model = models.get(0);
+		Model[] modelsArray= models.toArray(new Model[models.size()]);
+		//Model model = models.get(0);
 		if (this.regressionTask)
-			return ModelUtils.combineModels(model);
+			return ModelUtils.combineModels(modelsArray);
 
 
 		return null;

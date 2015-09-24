@@ -51,20 +51,23 @@ public class Evaluation {
 	    		 	// conversion step
 	    		 // number of role <=1
 	    		 for (OWLLiteral owlLiteral : dataPropertyValues2) {
-	    		
-	    			 if (owlLiteral.isDouble()){
+	    		System.out.println("Literal: "+ owlLiteral);
+	    			 //if (owlLiteral.isDouble()){
 	    			 double v = owlLiteral.parseDouble();
+	    			 System.out.println("-->"+v);
 	    			 model.setValues(query, v);
-	    			 }
-	    			 else if (owlLiteral.isFloat()){
-		    			 double v = owlLiteral.parseFloat();
-		    			 model.setValues(query, v);
-		    			 }
-	    			 else if (owlLiteral.isInteger()){
-		    			 double v = 0.0+(owlLiteral.parseInteger());
-		    			 model.setValues(query, v);
-		    		}
-				}
+	    			 //}
+	    			 //else if (owlLiteral.isFloat()){
+		    			// double v = owlLiteral.parseFloat();
+		    			 //System.out.println("-->"+v);
+		    			 //model.setValues(query, v);
+		    			 //}
+	    			 //else if (owlLiteral.isInteger()){
+		    			// double v = 0.0+(owlLiteral.parseInteger());
+		    			 //System.out.println("--->"+v);
+		    			 //model.setValues(query, v);
+		    		//}
+	    		 }
 	    		 ModelUtils.setModels(ind, model); // add to set of predictions
 	    		 
 	    	 } 		 
@@ -78,7 +81,7 @@ public class Evaluation {
 	
 		
 		
-		System.out.println("No individual"+allExamples.length);
+		//System.out.println("No individual"+allExamples.length);
 	}
 
 	public  void bootstrap( int nFolds) throws Exception {
@@ -101,6 +104,7 @@ public class Evaluation {
 			for (int r=0; r<allExamples.length; r++) {
 				OWLIndividual e = allExamples[generator.nextInt(allExamples.length)];
 				trainingExsSet.add(e);
+				//System.out.println(r+"--"+ModelUtils.getModels(e));
 				trainingPredictions.put(e, ModelUtils.getModels(e));
 				
 			}
@@ -120,7 +124,11 @@ public class Evaluation {
 		SortedSet<OWLIndividual> undExs= new TreeSet<OWLIndividual>();
 		
 		boolean consistent = kb.getReasoner().isConsistent();
-			
+		
+		//System.out.println(dataPropertyValues);
+		
+		
+		System.out.println(trainingPredictions.values());
 		
 		
 		inducer.induceTree(posExs, negExs, undExs, trainingPredictions.values());

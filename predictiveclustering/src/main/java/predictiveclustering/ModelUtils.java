@@ -33,15 +33,19 @@ public class ModelUtils<K,E> {
 		Model<OWLDataPropertyExpression,Double> result= new Model<OWLDataPropertyExpression,Double>();
 		Set<OWLDataPropertyExpression> getkeys = m1[0].getkeys();
 		for (OWLDataPropertyExpression owlDataPropertyExpression : getkeys) {
-			
+			int n=0;
 			double avg=0;
 			for (int i = 0; i < m1.length; i++) {
 				Double value = m1[i].getValue(owlDataPropertyExpression);
-				avg+=value;
+				if (value!=null){ // the individual with null value are not considered in the computation of the model
+					avg+=value;
+					n++;
+					
+				}
 			}
 		
 		
-			avg/=m1.length;
+			avg/=n;
 			 result.setValues(owlDataPropertyExpression,avg);
 		}
 			 
