@@ -28,7 +28,7 @@ import predictiveclustering.utils.Split;
 public class PredictiveClusterInducer<K,E> {
 	private PelletReasoner reasoner;
 	private PredictiveTree<K,E> tree;
-	private int MAXDEPTH= 7; 
+	private int MAXDEPTH= 5; 
 	private static boolean regressionTask= true;
 
 	private static Logger logger = LoggerFactory.getLogger(PredictiveClusterInducer.class);
@@ -50,14 +50,14 @@ System.out.println("Learning start");
 		Double prPos =0.5;
 		Double prNeg=0.5;
 		// combination of the models of the training individuals
-		ArrayList<Model> models= new ArrayList<Model>() ;
+		ArrayList<Model> models= new ArrayList<Model>(collection) ;
 		//computePriors(posExs, negExs, undExs, models);
 
-		//Model<K,E>[] m= models.toArray(new Model[models.size()]);
+		Model[] m= models.toArray(new Model[models.size()]);
 		// model for each element
-		Model priorModel1= computeModel(posExs, negExs, undExs, models, regressionTask);
+		Model priorModel1= ModelUtils.combineModels(m);  //computeModel(posExs, negExs, undExs, models, regressionTask);
 		
-
+		
 		logger.info("Learning problem\t p:"+posExs.size()+"\t n:"+negExs.size()+"\t u:"+undExs.size()+"\t prPos:"+prPos+"\t prNeg:"+prNeg+"\n");
 		//		//ArrayList<OWLIndividual> truePos= posExs;
 		//		//ArrayList<OWLIndividual> trueNeg= negExs;
@@ -93,8 +93,8 @@ System.out.println("Learning start");
 			//			
 			if ((posExs.size()==0) && (negExs.size()==0) && (undExs.size()==0)){
 				
-				currentTree.setRoot(null, priorModel1);
-				System.out.println("Leaf: "+ priorModel1);
+				currentTree.setRoot(null,priorModel1);
+				System.out.println("Leaf (prior): "+ priorModel1);
 				
 
 			}else if (depth>MAXDEPTH){
@@ -109,7 +109,7 @@ System.out.println("Learning start");
 								
 				// for each candidate computes the local models if it exists
 				OWLClassExpression[] ref= refinements.toArray(new OWLClassExpression[refinements.size()]);
-				OWLClassExpression bestDescription= heuristic.selectBestConcept(ref, posExs, negExs, undExs, 0, 0);
+				OWLClassExpression bestDescription= heuristic.selectBestConceptRMSE(ref, posExs, negExs, undExs,models, 0, 0);
 				Model localModel2= computeModel(posExs, negExs, undExs, models, regressionTask);
 				SortedSet<OWLIndividual> negExsF = new TreeSet<OWLIndividual>();
 				SortedSet<OWLIndividual> undExsT = new TreeSet<OWLIndividual>();
@@ -173,8 +173,7 @@ System.out.println("Learning start");
 		//Model model = models.get(0);
 		if (this.regressionTask)
 			return ModelUtils.combineModels(modelsArray);
-
-
+		
 		return null;
 	}
 
@@ -198,7 +197,6 @@ System.out.println("Learning start");
 			
 			
 			OWLClassExpression rootClass = (OWLClassExpression)currentTree.getRoot().getT();
-			System.out.println(rootClass);
 
 			//			System.out.println("Root class: "+ rootClass);
 			if (rootClass==null){

@@ -29,7 +29,7 @@ import com.clarkparsia.pellet.owlapiv3.PelletReasoner;
 public class KnowledgeBase {
 
 	private OWLOntologyManager manager;
-	private String urlOwlFile = "C:/Users/Utente/Desktop/MDM0.732.owl";
+	private String urlOwlFile = "C:/Users/Utente/Desktop/Datasets/Finance.owl";
 	private OWLDataFactory dataFactory;
 	private PelletReasoner reasoner;
 	private OWLClass[] allConcepts;

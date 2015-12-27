@@ -3,11 +3,14 @@ package predictiveclustering;
 
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -190,7 +193,88 @@ public class TreeInductionHeuristics {
 
 	}
 
+
+
+
+
+
+	public OWLClassExpression selectBestConceptRMSE(OWLClassExpression[] ref, SortedSet<OWLIndividual> posExs,
+			SortedSet<OWLIndividual> negExs, SortedSet<OWLIndividual> undExs, ArrayList<Model> models, int i, int j) {
+		// TODO Auto-generated method stub
 		
+		int bestConceptIndex = 0;
+		double bestgain=Double.MIN_VALUE;
+		
+		double initialRmse= rmse(posExs, negExs,undExs, models);
+		
+		for (int k=1; k< ref.length; k++){
+			SortedSet<OWLIndividual> negExsT = new TreeSet<OWLIndividual>();
+			SortedSet<OWLIndividual> undExsT = new TreeSet<OWLIndividual>();
+			SortedSet<OWLIndividual> posExsT = new TreeSet<OWLIndividual>();
+			SortedSet<OWLIndividual> posExsF= new TreeSet<OWLIndividual>();
+			SortedSet<OWLIndividual> undExsF = new TreeSet<OWLIndividual>();
+			SortedSet<OWLIndividual> negExsF = new TreeSet<OWLIndividual>();
+			// find a split w.r.t. the new refinement
+			split(ref[k], posExs, negExs, undExs, posExsT, negExsT, undExsT, posExsF, negExsF, undExsF);
+			 double positiveRmse= ((posExsT.size())+ (negExsT.size())+(undExsT.size())) *(rmse(posExsT, negExsT,undExsT, models))/ ((posExs.size())+ (negExs.size())+(undExs.size()));
+			 double negativeRmse= ((posExsF.size())+ (negExsF.size())+(undExsF.size())) *(rmse(posExsF, negExsF,undExsF, models))/ ((posExs.size())+ (negExs.size())+(undExs.size()));
+			
+			 double gain= initialRmse- positiveRmse-negativeRmse;  // gain 
+			 
+			 if (gain>bestgain){
+				 
+				 bestgain= gain;
+				 bestConceptIndex= k;
+			 }
+			
+			
+		}
+		
+		 return ref[bestConceptIndex]; // return the best concept description
+		
+		
+		
+	}
+
+
+
+
+
+
+	private double rmse(SortedSet<OWLIndividual> posExs, SortedSet<OWLIndividual> negExs,
+			SortedSet<OWLIndividual> undExs, ArrayList<Model> models) {
+		// TODO Auto-generated method stub
+		ArrayList<Model> m= new ArrayList<Model>(); // initialize the model
+		for (OWLIndividual pE : posExs) {
+			Model  models2 = ModelUtils.getModels(pE); // get the model for the current training individual
+			m.add(models2);
+		}
+		// after the models have been collected, standardize and compute the RMSE
+		HashMap<OWLDataProperty, Double> v= new HashMap<OWLDataProperty, Double>();
+		for (Model model : m) {
+			Set getkeys = model.getkeys();
+			for (Object object : getkeys) {
+				OWLDataProperty prop= (OWLDataProperty) object;
+				v.put(prop, (Double)model.getValue(object));
+			}	
+		}
+		
+		Set<OWLDataProperty> keySet = v.keySet(); 
+		ArrayList<Double> values= new ArrayList<Double>(); // the average values  
+	
+		
+		
+		
+		// do the same for positive and uncertain-membership instances
+		
+		
+		
+		return 0;
+	}
+
+	
+	
+	
 
 
 

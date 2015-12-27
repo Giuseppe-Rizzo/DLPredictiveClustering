@@ -12,6 +12,15 @@ public class ModelUtils<K,E> {
 	//<owl individual, <property, filler>
 	private static Map<OWLIndividual, Model> models = new HashMap<OWLIndividual, Model>(); // it contains associated to the individuals
 	
+	public static  Map<OWLIndividual, Model> getModels(){
+		
+		return models;
+		
+	}
+	
+	
+	
+	
 	public static <K,E> Model<K,E> getModels(OWLIndividual ind){
 		
 		return models.get(ind);

@@ -9,7 +9,7 @@ public class EvaluationTest {
 	@Test
 	public void test() throws Exception {
 		Evaluation eval= new Evaluation();
-		eval.bootstrap(1);
+		eval.bootstrap(2);
 	}
 
 }
