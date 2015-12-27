@@ -3,6 +3,7 @@ package predictiveclustering;
 
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.SortedSet;
@@ -247,20 +248,35 @@ public class TreeInductionHeuristics {
 		ArrayList<Model> m= new ArrayList<Model>(); // initialize the model
 		for (OWLIndividual pE : posExs) {
 			Model  models2 = ModelUtils.getModels(pE); // get the model for the current training individual
-			m.add(models2);
+			m.add(models2); // a model is composed by pairs (prop, value);
 		}
 		// after the models have been collected, standardize and compute the RMSE
-		HashMap<OWLDataProperty, Double> v= new HashMap<OWLDataProperty, Double>();
-		for (Model model : m) {
-			Set getkeys = model.getkeys();
-			for (Object object : getkeys) {
-				OWLDataProperty prop= (OWLDataProperty) object;
-				v.put(prop, (Double)model.getValue(object));
-			}	
-		}
+		HashMap<OWLDataProperty,Double> v= new HashMap<OWLDataProperty, Double>();
 		
-		Set<OWLDataProperty> keySet = v.keySet(); 
-		ArrayList<Double> values= new ArrayList<Double>(); // the average values  
+	
+		Set<OWLDataProperty> keySet = m.get(0).getkeys(); // get the key set for obtaining query properties
+		for (OWLDataProperty owlDataProperty : keySet) {
+			ArrayList<Double> values= new ArrayList<Double>(); // collect the values for finding average, max and min in order to perform standardization
+			ArrayList<Double> standardizedValues= new ArrayList<Double>();
+			for (Model model : m) {
+				
+				values.add((Double)model.getValue(owlDataProperty)); // add the value to the list
+			}
+			
+			Double max = Collections.max(values); // max and min for standardization
+			Double min= Collections.min(values);
+			
+			for (Double double1 : values) {
+				double stddouble= (double1 - min)/(max-min); //standardization  min max 
+				standardizedValues.add(stddouble); // add standardized value
+				
+			} 
+		     // compute the normalized rmse for the value rmse
+			
+		
+		}
+		  
+		
 	
 		
 		
