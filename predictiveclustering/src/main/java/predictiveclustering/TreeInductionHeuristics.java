@@ -253,7 +253,44 @@ public class TreeInductionHeuristics {
 		// after the models have been collected, standardize and compute the RMSE
 		HashMap<OWLDataProperty,Double> v= new HashMap<OWLDataProperty, Double>();
 		
-	
+		double msePos= computeMSE(m); 
+		m= new ArrayList<Model>();
+		
+		// do the same for negative example
+		for (OWLIndividual pE : negExs) {
+			Model  models2 = ModelUtils.getModels(pE); // get the model for the current training individual
+			m.add(models2); // a model is composed by pairs (prop, value);
+		}
+		
+		double mseNeg= computeMSE(m);
+		
+		// do the same for uncertain example
+		m= new ArrayList<Model>();
+				for (OWLIndividual pE : undExs) {
+					Model  models2 = ModelUtils.getModels(pE); // get the model for the current training individual
+					m.add(models2); // a model is composed by pairs (prop, value);
+				}
+		
+		  
+		
+		double mseUnd= computeMSE(m);
+		 return msePos+mseNeg+mseUnd;
+		
+		
+		// do the same for positive and uncertain-membership instances
+		
+		
+		
+		//return 0;
+	}
+
+
+
+
+
+
+	private double computeMSE(ArrayList<Model> m) {
+		double mse=0.0d; //mse error
 		Set<OWLDataProperty> keySet = m.get(0).getkeys(); // get the key set for obtaining query properties
 		for (OWLDataProperty owlDataProperty : keySet) {
 			ArrayList<Double> values= new ArrayList<Double>(); // collect the values for finding average, max and min in order to perform standardization
@@ -265,27 +302,21 @@ public class TreeInductionHeuristics {
 			
 			Double max = Collections.max(values); // max and min for standardization
 			Double min= Collections.min(values);
-			
+			Double avg= 0.0d;
 			for (Double double1 : values) {
 				double stddouble= (double1 - min)/(max-min); //standardization  min max 
 				standardizedValues.add(stddouble); // add standardized value
-				
+				avg+=(stddouble/values.size()); 
 			} 
 		     // compute the normalized rmse for the value rmse
 			
-		
+			for (Double double1 : standardizedValues) {
+				mse+= ((double1-avg)*(double1-avg)); // 
+			}
+			 mse/= standardizedValues.size();
+			
 		}
-		  
-		
-	
-		
-		
-		
-		// do the same for positive and uncertain-membership instances
-		
-		
-		
-		return 0;
+		return mse;
 	}
 
 	
