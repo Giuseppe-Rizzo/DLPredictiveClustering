@@ -3,6 +3,7 @@ package predictiveclustering;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -46,6 +47,8 @@ public class Evaluation {
 
 
 			allExamples=kb.getAllExamples();
+// add a way to handle the individuals with null values
+			
 			for (OWLIndividual ind: allExamples){
 				System.out.println("New Individuals: "+ind);
 				Model<OWLDataPropertyExpression, Double> model= new Model<OWLDataPropertyExpression, Double>(); 
@@ -83,15 +86,16 @@ public class Evaluation {
 					System.out.println("Model: "+model);
 					}
 					 // add to set of predictions
-				} 		 
-
+				} 		 				
+				
 				
 				ModelUtils.setModels(ind, model);
 
 			}
-			System.out.println();
 			
-
+			
+			
+			
 		} 
 
 
@@ -99,10 +103,45 @@ public class Evaluation {
 		//Model[] valuesA= values.toArray( new Model[values.size()]);
 		overallModels= ModelUtils.getModels().values();
 		System.out.println( "OVERALL MODELS");
-		for (Model m : overallModels) {
-			System.out.println(m);
-		}
+		for (OWLDataPropertyExpression query : queries) {
+		
+			Double avg=0.0d;
+			int n=0;
+			
+			for (Model m : overallModels) {
+				 
+				Object value = m.getValue(query);
+				if (value != null){
+					
+					avg +=((Double) value);
+					n++;
+				}
+				 //System.out.println(value);
+			}
+			
+			avg/= n; // to replace 
+			
+			for (Model m : overallModels) {
+				 
+				Object value = m.getValue(query);
+				if (value == null){
+					m.setValues(query, avg);
+				}
+				 System.out.println(m);
+			}
 
+//			for (Model m : overallModels) {
+//				System.out.println(m);
+//			}
+			
+			//Map models= ModelUtils.getModels();
+			for (Model m : overallModels) {
+				System.out.println(m);	
+			}
+			
+
+		}
+		
 		//System.out.println("No individual"+allExamples.length);
 	}
 
@@ -126,8 +165,10 @@ public class Evaluation {
 				OWLIndividual e = allExamples[generator.nextInt(allExamples.length)];
 				trainingExsSet.add(e);
 				//System.out.println(r+"--"+ModelUtils.getModels(e));
-				trainingPredictions.put(e, ModelUtils.getModels(e));
-
+				Model<Object, Object> models = ModelUtils.getModels(e);
+				System.out.println("-->"+models);
+				trainingPredictions.put(e, models);
+ // TODO replace the null values for all properties with the average values
 				
 			}
 			
@@ -147,7 +188,7 @@ public class Evaluation {
 			SortedSet<OWLIndividual> posExs= new TreeSet<OWLIndividual>(trainingExsSet);
 			SortedSet<OWLIndividual> negExs= new TreeSet<OWLIndividual>();
 			SortedSet<OWLIndividual> undExs= new TreeSet<OWLIndividual>();
-
+//
 			boolean consistent = kb.getReasoner().isConsistent();
 
 			//System.out.println(dataPropertyValues);
@@ -156,7 +197,7 @@ public class Evaluation {
 			//System.out.println(trainingPredictions.values());
 
 
-			PredictiveTree induceTree = inducer.induceTree(posExs, negExs, undExs, overallModels);
+			PredictiveTree induceTree = inducer.induceTree(posExs, negExs, undExs, overallModels, queries);
 
 			//initialization mapping between individuals and prediction with respect to
 			Map<OWLDataPropertyExpression,Map<OWLIndividual,Double>> differences=new HashMap<OWLDataPropertyExpression,Map<OWLIndividual,Double>>();

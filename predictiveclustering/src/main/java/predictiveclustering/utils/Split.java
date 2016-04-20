@@ -48,10 +48,10 @@ public class Split {
 			OWLClassAssertionAxiom negOwlClassAssertionAxiom = dataFactory.getOWLClassAssertionAxiom(negConcept, individual);
 			if (reasoner.isEntailed(owlClassAssertionAxiom))
 				posExsT.add(individual);
-			else if (reasoner.isEntailed(negOwlClassAssertionAxiom))
+			else  //if (reasoner.isEntailed(negOwlClassAssertionAxiom))
 				posExsF.add(individual);
-			else
-				posExsU.add(individual);		
+			//else
+				//posExsU.add(individual);		
 		}	
 
 	}

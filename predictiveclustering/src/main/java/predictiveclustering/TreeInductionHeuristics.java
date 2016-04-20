@@ -119,7 +119,7 @@ public class TreeInductionHeuristics {
 		double sizeT = counts[POSITIVE_INSTANCE_CHECK_TRUE] + counts[POSITIVE_INSTANCE_CHECK_FALSE];
 		double sizeF = counts[NEGATIVE_INSTANCE_CHECK_TRUE] + counts[NEGATIVE_INSTANCE_CHECK_FALSE];
 		double sizeU = counts[POSITIVE_INSTANCE_CHECK_UNC] + counts[NEGATIVE_INSTANCE_CHECK_UNC ] + counts[UNCERTAIN_INSTANCE_CHECK_TRUE] + counts[UNCERTAIN_INSTANCE_CHECK_FALSE];
-		double sum = sizeT+sizeF+sizeU;
+		double sum = sizeT+sizeF+sizeU; 
 
 		double startImpurity = gini(counts[POSITIVE_INSTANCE_CHECK_TRUE]+counts[POSITIVE_INSTANCE_CHECK_FALSE], counts[NEGATIVE_INSTANCE_CHECK_TRUE]+counts[NEGATIVE_INSTANCE_CHECK_FALSE], prPos, prNeg);
 		double tImpurity = gini(counts[POSITIVE_INSTANCE_CHECK_TRUE], counts[NEGATIVE_INSTANCE_CHECK_TRUE], prPos, prNeg);
@@ -198,15 +198,27 @@ public class TreeInductionHeuristics {
 
 
 
-
+ /**
+  * Select the best concept according to the minimization of the RMSE
+  * @param ref
+  * @param posExs
+  * @param negExs
+  * @param undExs
+  * @param models
+  * @param i
+  * @param j
+ * @param queries 
+  * @return
+  */
 	public OWLClassExpression selectBestConceptRMSE(OWLClassExpression[] ref, SortedSet<OWLIndividual> posExs,
-			SortedSet<OWLIndividual> negExs, SortedSet<OWLIndividual> undExs, ArrayList<Model> models, int i, int j) {
+			SortedSet<OWLIndividual> negExs, SortedSet<OWLIndividual> undExs, ArrayList<Model> models, int i, int j, Set<OWLDataProperty> queries) {
 		// TODO Auto-generated method stub
 		
 		int bestConceptIndex = 0;
 		double bestgain=Double.MIN_VALUE;
-		
-		double initialRmse= rmse(posExs, negExs,undExs, models);
+		System.out.println("Size "+ref.length);
+		logger.info(("Model: "+ models.size()));
+		double initialRmse= rmse(posExs, negExs,undExs, models, queries);
 		
 		for (int k=1; k< ref.length; k++){
 			SortedSet<OWLIndividual> negExsT = new TreeSet<OWLIndividual>();
@@ -217,13 +229,13 @@ public class TreeInductionHeuristics {
 			SortedSet<OWLIndividual> negExsF = new TreeSet<OWLIndividual>();
 			// find a split w.r.t. the new refinement
 			split(ref[k], posExs, negExs, undExs, posExsT, negExsT, undExsT, posExsF, negExsF, undExsF);
-			 double positiveRmse= ((posExsT.size())+ (negExsT.size())+(undExsT.size())) *(rmse(posExsT, negExsT,undExsT, models))/ ((posExs.size())+ (negExs.size())+(undExs.size()));
-			 double negativeRmse= ((posExsF.size())+ (negExsF.size())+(undExsF.size())) *(rmse(posExsF, negExsF,undExsF, models))/ ((posExs.size())+ (negExs.size())+(undExs.size()));
+			 double positiveRmse= ((posExsT.size())+ (negExsT.size())+(undExsT.size())) *(rmse(posExsT, negExsT,undExsT, models, queries))/ ((posExs.size())+ (negExs.size())+(undExs.size()));
+			 double negativeRmse= ((posExsF.size())+ (negExsF.size())+(undExsF.size())) *(rmse(posExsF, negExsF,undExsF, models, queries))/ ((posExs.size())+ (negExs.size())+(undExs.size()));
 			
 			 double gain= initialRmse- positiveRmse-negativeRmse;  // gain 
 			 
 			 if (gain>bestgain){
-				 
+				
 				 bestgain= gain;
 				 bestConceptIndex= k;
 			 }
@@ -241,19 +253,29 @@ public class TreeInductionHeuristics {
 
 
 
-
+/**
+ * Compute the RMSE for the set of positive, negative and possibly uncertain instances
+ * @param posExs
+ * @param negExs
+ * @param undExs
+ * @param models
+ * @param queries 
+ * @return
+ */
 	private double rmse(SortedSet<OWLIndividual> posExs, SortedSet<OWLIndividual> negExs,
-			SortedSet<OWLIndividual> undExs, ArrayList<Model> models) {
+			SortedSet<OWLIndividual> undExs, ArrayList<Model> models, Set<OWLDataProperty> queries) {
 		// TODO Auto-generated method stub
 		ArrayList<Model> m= new ArrayList<Model>(); // initialize the model
 		for (OWLIndividual pE : posExs) {
 			Model  models2 = ModelUtils.getModels(pE); // get the model for the current training individual
 			m.add(models2); // a model is composed by pairs (prop, value);
 		}
+		System.out.println("M +"+ m);
+		
 		// after the models have been collected, standardize and compute the RMSE
 		HashMap<OWLDataProperty,Double> v= new HashMap<OWLDataProperty, Double>();
 		
-		double msePos= computeMSE(m); 
+		double msePos= computeMSE(m, queries); 
 		m= new ArrayList<Model>();
 		
 		// do the same for negative example
@@ -261,8 +283,8 @@ public class TreeInductionHeuristics {
 			Model  models2 = ModelUtils.getModels(pE); // get the model for the current training individual
 			m.add(models2); // a model is composed by pairs (prop, value);
 		}
-		
-		double mseNeg= computeMSE(m);
+		logger.info(m.toString());
+		double mseNeg= computeMSE(m, queries);
 		
 		// do the same for uncertain example
 		m= new ArrayList<Model>();
@@ -273,12 +295,9 @@ public class TreeInductionHeuristics {
 		
 		  
 		
-		double mseUnd= computeMSE(m);
+		double mseUnd= computeMSE(m, queries);
 		 return msePos+mseNeg+mseUnd;
-		
-		
 		// do the same for positive and uncertain-membership instances
-		
 		
 		
 		//return 0;
@@ -289,19 +308,26 @@ public class TreeInductionHeuristics {
 
 
 
-	private double computeMSE(ArrayList<Model> m) {
+	private double computeMSE(ArrayList<Model> m, Set<OWLDataProperty> queries) {
 		double mse=0.0d; //mse error
-		Set<OWLDataProperty> keySet = m.get(0).getkeys(); // get the key set for obtaining query properties
+		Set<OWLDataProperty> keySet = queries; // get the key set for obtaining query properties
 		for (OWLDataProperty owlDataProperty : keySet) {
 			ArrayList<Double> values= new ArrayList<Double>(); // collect the values for finding average, max and min in order to perform standardization
 			ArrayList<Double> standardizedValues= new ArrayList<Double>();
+			Double max= Double.MIN_VALUE;
+			Double min= Double.MAX_VALUE;
 			for (Model model : m) {
-				
-				values.add((Double)model.getValue(owlDataProperty)); // add the value to the list
+				System.out.println("looooooooooool"+model.toString());
+				Double value = (Double)model.getValue(owlDataProperty);
+				values.add(value); // add the value to the list
+				if (value < min)
+					min= value;
+				if (value > max)
+					max= value;
 			}
 			
-			Double max = Collections.max(values); // max and min for standardization
-			Double min= Collections.min(values);
+			//Double max = Collections.max(values); // max and min for standardization
+			//Double min= Collections.min(values);
 			Double avg= 0.0d;
 			for (Double double1 : values) {
 				double stddouble= (double1 - min)/(max-min); //standardization  min max 

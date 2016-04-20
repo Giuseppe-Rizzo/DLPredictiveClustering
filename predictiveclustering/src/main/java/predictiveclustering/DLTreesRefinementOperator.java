@@ -33,7 +33,9 @@ import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
 //import knowledgeBasesHandler.KnowledgeBase;
 
 /**
- * The refinement operator
+ * The refinement operator adopted for generating candidates
+ * The operator introduces a new concept name or it replaces a subdescription by using
+ * either an existential restriction or an universal restriction 
  * @author Giuseppe Rizzo
  *
  */

@@ -44,7 +44,7 @@ public class PredictiveClusterInducer<K,E> {
 
 
 
-	public <K,E> PredictiveTree<OWLClassExpression,Model<K,E>> induceTree(SortedSet<OWLIndividual> posExs, SortedSet<OWLIndividual> negExs, SortedSet<OWLIndividual> undExs, Collection collection) {		
+	public <K,E> PredictiveTree<OWLClassExpression,Model<K,E>> induceTree(SortedSet<OWLIndividual> posExs, SortedSet<OWLIndividual> negExs, SortedSet<OWLIndividual> undExs, Collection collection, Set<OWLDataProperty> queries) {		
 		// K: data properties
 System.out.println("Learning start");
 		Double prPos =0.5;
@@ -105,11 +105,10 @@ System.out.println("Learning start");
 
 			}
 			else{
-				Set<OWLClassExpression> refinements = dlTreesRefinementOperator.refine(null,posExs, negExs); // neg exs will be empty
-								
+				Set<OWLClassExpression> refinements = dlTreesRefinementOperator.refine(null,posExs, negExs); // neg exs will be empty					
 				// for each candidate computes the local models if it exists
 				OWLClassExpression[] ref= refinements.toArray(new OWLClassExpression[refinements.size()]);
-				OWLClassExpression bestDescription= heuristic.selectBestConceptRMSE(ref, posExs, negExs, undExs,models, 0, 0);
+				OWLClassExpression bestDescription= heuristic.selectBestConceptRMSE(ref, posExs, negExs, undExs,models, 0, 0, queries);
 				Model localModel2= computeModel(posExs, negExs, undExs, models, regressionTask);
 				SortedSet<OWLIndividual> negExsF = new TreeSet<OWLIndividual>();
 				SortedSet<OWLIndividual> undExsT = new TreeSet<OWLIndividual>();
