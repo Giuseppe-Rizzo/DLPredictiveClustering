@@ -25,6 +25,13 @@ import predictiveclustering.utils.Couple;
 import predictiveclustering.utils.Npla;
 import predictiveclustering.utils.Split;
 
+/**
+ * Implementation of the procedure for growing and for making prediction through Predictive Clustering Trees
+ * @author Giuseppe Rizzo
+ *
+ * @param <K> the objects to be predicted
+ * @param <E> the models 
+ */
 public class PredictiveClusterInducer<K,E> {
 	private PelletReasoner reasoner;
 	private PredictiveTree<K,E> tree;
@@ -43,10 +50,18 @@ public class PredictiveClusterInducer<K,E> {
 	}
 
 
-
+/**
+ * Procedure for growing the tree
+ * @param posExs
+ * @param negExs
+ * @param undExs
+ * @param collection
+ * @param queries
+ * @return
+ */
 	public <K,E> PredictiveTree<OWLClassExpression,Model<K,E>> induceTree(SortedSet<OWLIndividual> posExs, SortedSet<OWLIndividual> negExs, SortedSet<OWLIndividual> undExs, Collection collection, Set<OWLDataProperty> queries) {		
 		// K: data properties
-System.out.println("Learning start");
+logger.info("Learning start");
 		Double prPos =0.5;
 		Double prNeg=0.5;
 		// combination of the models of the training individuals
@@ -79,7 +94,7 @@ System.out.println("Learning start");
 
 		while (!stack.isEmpty()){
 
-			
+	
 			Couple<PredictiveTree<OWLClassExpression, Model<K,E>>, Npla<SortedSet<OWLIndividual>, SortedSet<OWLIndividual>, SortedSet<OWLIndividual>, Integer, Double, Double>> pop = stack.pop();
 			PredictiveTree<OWLClassExpression, Model<K,E>> currentTree = pop.getFirstElement();
 			// generate the candidate concepts
@@ -118,9 +133,7 @@ System.out.println("Learning start");
 				SortedSet<OWLIndividual> negExsT = new TreeSet<OWLIndividual>();
 				Split.split(bestDescription, reasoner.getManager().getOWLDataFactory(), reasoner, posExs, negExs, undExs, posExsT, negExsT, undExsT, posExsF, negExsF, undExsF); 
 
-
 				// set the root
-
 				currentTree.setRoot(bestDescription, localModel2);
 				System.out.println("Installed description: "+currentTree.getRoot().getT());
 				PredictiveTree<OWLClassExpression, Model<K,E>> posTree= new PredictiveTree<OWLClassExpression, Model<K,E>>();
@@ -139,8 +152,6 @@ System.out.println("Learning start");
 				neg.setSecondElement(npla2);
 				stack.push(neg);
 				stack.push(pos);
-
-
 			}
 
 
@@ -151,6 +162,15 @@ System.out.println("Learning start");
 	}
 
 
+	/**
+	 * The model to assign to the leaf
+	 * @param posExs
+	 * @param negExs
+	 * @param undExs
+	 * @param models
+	 * @param regressionTask
+	 * @return
+	 */
 	private  Model computeModel(SortedSet<OWLIndividual> posExs, SortedSet<OWLIndividual> negExs,
 			SortedSet<OWLIndividual> undExs, ArrayList<Model> models, boolean regressionTask) {
 		for (OWLIndividual owlIndividual : posExs) {
@@ -183,6 +203,13 @@ System.out.println("Learning start");
 	}
 
 
+	/**
+	 * Predict the approximate filler for the test individual
+	 * @param indTestEx
+	 * @param tree
+	 * @param dataFactory
+	 * @return the prediction
+	 */
 	public  Model classifyExample(OWLIndividual indTestEx, PredictiveTree tree, OWLDataFactory dataFactory) {
 
 

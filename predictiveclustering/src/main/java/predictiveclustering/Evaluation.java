@@ -32,9 +32,10 @@ public class Evaluation {
 	Collection<Model> overallModels; 
 
 
-	public Evaluation() {
+	public Evaluation(String file) {
 		//initialization KB
 		this.kb=new KnowledgeBase();
+		kb.setUrlOwlFile(file);
 		this.kb.initKB();
 		// collecting property values;
 		generator= new Random(2);

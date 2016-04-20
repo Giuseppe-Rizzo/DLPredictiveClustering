@@ -25,7 +25,11 @@ import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
 
 
 //import evaluation.Parameters;
-
+/**
+ * The heuristics for inducing the predictive clustering trees
+ * @author Giuseppe Rizzo
+ *
+ */
 public class TreeInductionHeuristics {
 
 	private PelletReasoner reasoner;
@@ -292,7 +296,6 @@ public class TreeInductionHeuristics {
 					Model  models2 = ModelUtils.getModels(pE); // get the model for the current training individual
 					m.add(models2); // a model is composed by pairs (prop, value);
 				}
-		
 		  
 		
 		double mseUnd= computeMSE(m, queries);
@@ -307,7 +310,12 @@ public class TreeInductionHeuristics {
 
 
 
-
+ /**
+  * Compute the MSE for each data property
+  * @param m, the models
+  * @param queries
+  * @return
+  */
 	private double computeMSE(ArrayList<Model> m, Set<OWLDataProperty> queries) {
 		double mse=0.0d; //mse error
 		Set<OWLDataProperty> keySet = queries; // get the key set for obtaining query properties

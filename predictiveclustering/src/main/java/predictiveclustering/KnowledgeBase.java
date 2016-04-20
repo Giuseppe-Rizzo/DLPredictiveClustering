@@ -144,7 +144,6 @@ public class KnowledgeBase {
 	public   OWLOntology initKB() {
 
 		manager = OWLManager.createOWLOntologyManager();        
-
 		// read the file
 		URI fileURI = URI.create(urlOwlFile);
 		dataFactory = manager.getOWLDataFactory();
