@@ -220,8 +220,7 @@ logger.info("Learning start");
 		boolean stop=false;
 		while(!stack.isEmpty() && !stop){
 			PredictiveTree currentTree= stack.pop();
-			
-			
+		
 			OWLClassExpression rootClass = (OWLClassExpression)currentTree.getRoot().getT();
 
 			//			System.out.println("Root class: "+ rootClass);
