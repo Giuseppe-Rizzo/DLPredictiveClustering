@@ -1,4 +1,4 @@
-package predictiveclustering;
+package it.uniba.di.lacam.ml.structuredpredictor.predictiveclustering;
 
 import java.io.File;
 import java.net.URI;
@@ -29,7 +29,7 @@ import com.clarkparsia.pellet.owlapiv3.PelletReasoner;
 public class KnowledgeBase {
 
 	private OWLOntologyManager manager;
-	private String urlOwlFile = "C:/Users/Utente/Desktop/Datasets/Finance.owl";
+	private String urlOwlFile = "";
 	private OWLDataFactory dataFactory;
 	private PelletReasoner reasoner;
 	private OWLClass[] allConcepts;

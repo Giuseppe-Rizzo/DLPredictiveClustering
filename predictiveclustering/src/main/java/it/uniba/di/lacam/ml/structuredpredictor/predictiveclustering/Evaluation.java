@@ -1,4 +1,4 @@
-package predictiveclustering;
+package it.uniba.di.lacam.ml.structuredpredictor.predictiveclustering;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -13,14 +13,18 @@ import java.util.TreeSet;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLDataPropertyExpression;
+import org.semanticweb.owlapi.model.OWLDataRange;
+import org.semanticweb.owlapi.model.OWLDatatype;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.vocab.OWL2Datatype;
 
-import predictiveclustering.utils.MathUtils;
-
+import com.clarkparsia.owlapiv3.OWL;
 import com.hp.hpl.jena.reasoner.Reasoner;
+
+import it.uniba.di.lacam.ml.structuredpredictor.predictiveclustering.utils.MathUtils;
 
 public class Evaluation {
 	KnowledgeBase kb;
@@ -39,112 +43,180 @@ public class Evaluation {
 		this.kb.initKB();
 		// collecting property values;
 		generator= new Random(2);
+		queries= new HashSet<OWLDataProperty>();
 		dataPropertyValues = kb.getDataPropertyValues();
 		// initialization of properties
 		Set<OWLOntology> ontologies = kb.getManager().getOntologies();
 		for (OWLOntology owlOntology : ontologies) {
 			System.out.println("Ontology: "+owlOntology);
-			queries = owlOntology.getDataPropertiesInSignature();
+
+			Set<OWLDataProperty> queries2 = owlOntology.getDataPropertiesInSignature();
+			for(OWLDataProperty q: queries2) {
+				Set<OWLDataRange> ranges= q.getRanges(owlOntology);
+				Iterator<OWLDataRange> iterator = ranges.iterator();
+				boolean numeric = false;
+				while(iterator.hasNext() && !numeric) {
+					OWLDataRange r= iterator.next();
+					if (r.isDatatype()) {
+						numeric=
+								r.asOWLDatatype().isFloat()||r.asOWLDatatype().isDouble()||r.asOWLDatatype().isInteger();
+						System.out.println(r.asOWLDatatype()+" " +numeric);
+					}
+				}
+				if (numeric)
+					queries.add(q);
+
+			}
+
+
+
+
+
+			System.out.println("size: "+ queries.size());
+
 
 
 			allExamples=kb.getAllExamples();
-// add a way to handle the individuals with null values
-			
+			// add a way to handle the individuals with null values
+
 			for (OWLIndividual ind: allExamples){
-				System.out.println("New Individuals: "+ind);
-				Model<OWLDataPropertyExpression, Double> model= new Model<OWLDataPropertyExpression, Double>(); 
-				// access to the pair (property, value)  and conversion from the literal to double
-				Double[] individual= new Double[queries.size()];
-				int n=0; 
-				for (OWLDataProperty query : queries) {
-					System.out.println("Query: "+ query);
-					Set<OWLLiteral> dataPropertyValues2 = ind.getDataPropertyValues(query, owlOntology);
-					// conversion step
-					// number of role <=1
-					for (OWLLiteral owlLiteral : dataPropertyValues2) {
-						//System.out.println("Literal: "+ owlLiteral);
-						//if (owlLiteral.isDouble()){
-						double v = owlLiteral.parseDouble();
-						//System.out.println("-->"+v);
-						model.setValues(query, v);
-						System.out.println("Literal: "+ v);
-						System.out.println("Model: "+model);
-						//}
-						//else if (owlLiteral.isFloat()){
-						// double v = owlLiteral.parseFloat();
-						//System.out.println("-->"+v);
-						//model.setValues(query, v);
-						//}
-						//else if (owlLiteral.isInteger()){
-						// double v = 0.0+(owlLiteral.parseInteger());
-						//System.out.println("--->"+v);
-						//model.setValues(query, v);
-						//}
+				if (ind.isNamed()){
+					//				System.out.println("New Individuals: "+ind);
+					Model<OWLDataPropertyExpression, Double> model= new Model<OWLDataPropertyExpression, Double>(); 
+					//				// access to the pair (property, value)  and conversion from the literal to double
+					for (OWLDataProperty d: queries) {
+						Set<OWLLiteral> dataPropertyValues2 = ind.getDataPropertyValues(d,owlOntology);
+								System.out.println("DP values "+ dataPropertyValues2.size());
+								for(OWLLiteral l:dataPropertyValues2) {
+									if (l.isDouble()) {
+										double v = l.parseDouble();
+										System.out.println("-->"+v);
+										model.setValues(d, v);
+									}else
+										if (l.isFloat()) {
+											float v = l.parseFloat();
+											System.out.println("-->"+v);
+											model.setValues(d, (double)v);
+										}else
+											if (l.isInteger()) {
+												float v = l.parseInteger();
+												System.out.println("-->"+v);
+												model.setValues(d, (double)v);
+											}
+
+									//System.out.println(ind+" "+ model);
+									ModelUtils.setModels(ind, model);
+								}
+						
+						
+
 					}
-					if (dataPropertyValues2.isEmpty()){
-						System.out.println("Literal: "+ null);
-					model.setValues(query, null);
-					System.out.println("Model: "+model);
-					}
-					 // add to set of predictions
-				} 		 				
-				
-				
-				ModelUtils.setModels(ind, model);
-
-			}
-			
-			
-			
-			
-		} 
-
-
-		//Collection<Model> values = ModelUtils.getModels().values();
-		//Model[] valuesA= values.toArray( new Model[values.size()]);
-		overallModels= ModelUtils.getModels().values();
-		System.out.println( "OVERALL MODELS");
-		for (OWLDataPropertyExpression query : queries) {
-		
-			Double avg=0.0d;
-			int n=0;
-			
-			for (Model m : overallModels) {
-				 
-				Object value = m.getValue(query);
-				if (value != null){
-					
-					avg +=((Double) value);
-					n++;
 				}
-				 //System.out.println(value);
 			}
-			
-			avg/= n; // to replace 
-			
-			for (Model m : overallModels) {
-				 
-				Object value = m.getValue(query);
-				if (value == null){
-					m.setValues(query, avg);
-				}
-				 System.out.println(m);
-			}
-
-//			for (Model m : overallModels) {
-//				System.out.println(m);
-//			}
-			
-			//Map models= ModelUtils.getModels();
-			for (Model m : overallModels) {
-				System.out.println(m);	
-			}
-			
-
 		}
-		
-		//System.out.println("No individual"+allExamples.length);
+
+
+		//			for (OWLIndividual ind: allExamples){
+		//				System.out.println("New Individuals: "+ind);
+		//				Model<OWLDataPropertyExpression, Double> model= new Model<OWLDataPropertyExpression, Double>(); 
+		//				// access to the pair (property, value)  and conversion from the literal to double
+		//
+		//
+		//
+		//
+		//				Map<OWLDataPropertyExpression, Set<OWLLiteral>> dataPropertyValues2 = ind.getDataPropertyValues(owlOntology);
+		//				System.out.println(dataPropertyValues2);
+		//				//				Double[] individual= new Double[queries.size()];
+		//				//				int n=0; 
+		//				for (OWLDataProperty query : queries) {
+		//					System.out.println("Query: "+query +"    "+query.getRanges(owlOntology));
+		//					Set<OWLLiteral> values2 = ind.getDataPropertyValues(query, owlOntology);
+		//					// conversion step
+		//					// number of role <=1
+		//					for (OWLLiteral owlLiteral : values2) {
+		//						//System.out.println("Literal: "+ owlLiteral);
+		//						if (owlLiteral.isDouble()||owlLiteral.isFloat()||owlLiteral.isInteger()){
+		//							double v = owlLiteral.parseDouble();
+		//							//System.out.println("-->"+v);
+		//							model.setValues(query, v);
+		////							System.out.println("Literal: "+ v);
+		////							System.out.println("Model: "+model);
+		//						}
+		//						//else if (owlLiteral.isFloat()){
+		//						// double v = owlLiteral.parseFloat();
+		//						//System.out.println("-->"+v);
+		//						//model.setValues(query, v);
+		//						//}
+		//						//else if (owlLiteral.isInteger()){
+		//						// double v = 0.0+(owlLiteral.parseInteger());
+		//						//System.out.println("--->"+v);
+		//						//model.setValues(query, v);
+		//					}
+		//				}
+		////				if (dataPropertyValues2.isEmpty()){
+		////					System.out.println("Literal: "+ null);
+		////					model.setValues(query, null);
+		////					System.out.println("Model: "+model);
+		////				}
+		////				//					 // add to set of predictions
+		//			} 		 				
+
+
+		//ModelUtils.setModels(ind, model);
+
 	}
+
+
+
+
+
+
+
+	//		//Collection<Model> values = ModelUtils.getModels().values();
+	//		//Model[] valuesA= values.toArray( new Model[values.size()]);
+	//		overallModels= ModelUtils.getModels().values();
+	//		System.out.println( "OVERALL MODELS");
+	//		for (OWLDataPropertyExpression query : queries) {
+	//		
+	//			Double avg=0.0d;
+	//			int n=0;
+	//			
+	//			for (Model m : overallModels) {
+	//				 
+	//				Object value = m.getValue(query);
+	//				if (value != null){
+	//					
+	//					avg +=((Double) value);
+	//					n++;
+	//				}
+	//				 //System.out.println(value);
+	//			}
+	//			
+	//			avg/= n; // to replace 
+	//			
+	//			for (Model m : overallModels) {
+	//				 
+	//				Object value = m.getValue(query);
+	//				if (value == null){
+	//					m.setValues(query, avg);
+	//				}
+	//				 System.out.println(m);
+	//			}
+	//
+	////			for (Model m : overallModels) {
+	////				System.out.println(m);
+	////			}
+	//			
+	//			//Map models= ModelUtils.getModels();
+	//			for (Model m : overallModels) {
+	//				System.out.println(m);	
+	//			}
+	//			
+	//
+	//		}
+
+	//System.out.println("No individual"+allExamples.length);
+	//			}
 
 	public  void bootstrap( int nFolds) throws Exception {
 		System.out.println(nFolds+"-fold BOOTSTRAP Experiment on ontology: ");	
@@ -169,10 +241,10 @@ public class Evaluation {
 				Model<Object, Object> models = ModelUtils.getModels(e);
 				System.out.println("-->"+models);
 				trainingPredictions.put(e, models);
- // TODO replace the null values for all properties with the average values
-				
+				// TODO replace the null values for all properties with the average values
+
 			}
-			
+
 			Double avgModel=0.00;
 			int notnull=0;
 			//
@@ -189,7 +261,7 @@ public class Evaluation {
 			SortedSet<OWLIndividual> posExs= new TreeSet<OWLIndividual>(trainingExsSet);
 			SortedSet<OWLIndividual> negExs= new TreeSet<OWLIndividual>();
 			SortedSet<OWLIndividual> undExs= new TreeSet<OWLIndividual>();
-//
+			//
 			boolean consistent = kb.getReasoner().isConsistent();
 
 			//System.out.println(dataPropertyValues);
@@ -262,8 +334,8 @@ public class Evaluation {
 				i++;
 			}
 
-			
-			
+
+
 			for (int j = 0; j < avgQueries.length; j++) {
 				if (avgQueries[j]!=null){
 					System.out.println("Avg Model"+avgQueries[j]);
@@ -272,30 +344,30 @@ public class Evaluation {
 				}
 
 			} 
-		
-		System.out.println("************* Results for the fold"+f+"***************");
-		double a = avgModel /notnull;
-		result[f]=Math.sqrt(a);
-		System.out.println("aRMME: "+ result[f]);
+
+			System.out.println("************* Results for the fold"+f+"***************");
+			double a = avgModel /notnull;
+			result[f]=Math.sqrt(a);
+			System.out.println("aRMME: "+ result[f]);
 
 		}
-		
+
 		System.out.println("************* Results of the experiments ***************");
-		
+
 		for (int f = 1; f <= nFolds; f++) {
-		System.out.println("Fold "+f+":   "+result[f-1]);	
+			System.out.println("Fold "+f+":   "+result[f-1]);	
 		}
-		
+
 		System.out.println("********* OVERALL RESULTS********************");
 		System.out.println("Average: "+ MathUtils.avg(result));
 		System.out.println("Std Dev."+ MathUtils.stdDeviation(result));
-		
+
 		//double a = avgModel /notnull;
 		//result[f]=a;
 		//System.out.println("aRMME: "+ Math.sqrt(a));
 
-		
-		
+
+
 	} // for f - fold look
 
 

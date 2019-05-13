@@ -1,4 +1,4 @@
-package predictiveclustering;
+package it.uniba.di.lacam.ml.structuredpredictor.predictiveclustering;
 
 import java.util.ArrayList;
 import java.util.Iterator;

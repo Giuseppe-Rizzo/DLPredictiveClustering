@@ -1,4 +1,4 @@
-package predictiveclustering.utils;
+package it.uniba.di.lacam.ml.structuredpredictor.predictiveclustering.utils;
 
 /**
  * A generic triple

@@ -1,4 +1,4 @@
-package predictiveclustering;
+package it.uniba.di.lacam.ml.structuredpredictor.predictiveclustering;
 
 
 
@@ -16,11 +16,10 @@ import org.semanticweb.owlapi.model.OWLIndividual;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import predictiveclustering.utils.Split;
-
 import com.clarkparsia.pellet.owlapiv3.PelletReasoner;
 import com.google.common.collect.Sets;
 
+import it.uniba.di.lacam.ml.structuredpredictor.predictiveclustering.utils.Split;
 import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
 
 

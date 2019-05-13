@@ -1,4 +1,4 @@
-package predictiveclustering;
+package it.uniba.di.lacam.ml.structuredpredictor.predictiveclustering;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,9 +21,9 @@ import org.slf4j.LoggerFactory;
 
 import com.clarkparsia.pellet.owlapiv3.PelletReasoner;
 
-import predictiveclustering.utils.Couple;
-import predictiveclustering.utils.Npla;
-import predictiveclustering.utils.Split;
+import it.uniba.di.lacam.ml.structuredpredictor.predictiveclustering.utils.Couple;
+import it.uniba.di.lacam.ml.structuredpredictor.predictiveclustering.utils.Npla;
+import it.uniba.di.lacam.ml.structuredpredictor.predictiveclustering.utils.Split;
 
 /**
  * Implementation of the procedure for growing and for making prediction through Predictive Clustering Trees

@@ -1,5 +1,4 @@
-import predictiveclustering.Evaluation;
-
+package it.uniba.di.lacam.ml.structuredpredictor.predictiveclustering;
 /**
  * Main procedure
  * @author Giuseppe Rizzo
@@ -12,8 +11,8 @@ public class DLPredictiveClusteringEvaluation {
 	}
 
 	public static void main(String[] args) throws Exception {
-	Evaluation  ev = new  Evaluation(args[0]);	
-	ev.bootstrap(Integer.parseInt(args[1]));
+	Evaluation  ev = new  Evaluation("C:/Users/Giuseppe/Documents/ontos/ontos4ArtificialLP/biopax.owl");	
+	ev.bootstrap(Integer.parseInt("5"));
 	
 
 	}

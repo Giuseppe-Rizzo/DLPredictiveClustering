@@ -1,4 +1,4 @@
-package predictiveclustering;
+package it.uniba.di.lacam.ml.structuredpredictor.predictiveclustering;
 
 public class PredictiveTree<E,Model> {
 	private Node<E,Model> root;
