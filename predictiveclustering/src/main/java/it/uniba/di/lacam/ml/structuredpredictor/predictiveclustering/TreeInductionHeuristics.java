@@ -273,7 +273,7 @@ public class TreeInductionHeuristics {
 			Model  models2 = ModelUtils.getModels(pE); // get the model for the current training individual
 			m.add(models2); // a model is composed by pairs (prop, value);
 		}
-		System.out.println("M +"+ m);
+		//System.out.println("M +"+ m);
 		
 		// after the models have been collected, standardize and compute the RMSE
 		HashMap<OWLDataProperty,Double> v= new HashMap<OWLDataProperty, Double>();
@@ -324,7 +324,7 @@ public class TreeInductionHeuristics {
 			Double max= Double.MIN_VALUE;
 			Double min= Double.MAX_VALUE;
 			for (Model model : m) {
-				System.out.println("looooooooooool"+model.toString());
+				//System.out.println("looooooooooool"+model.toString());
 				Double value = (Double)model.getValue(owlDataProperty);
 				values.add(value); // add the value to the list
 				if (value < min)

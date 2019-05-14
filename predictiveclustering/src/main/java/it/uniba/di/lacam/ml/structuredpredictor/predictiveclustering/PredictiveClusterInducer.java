@@ -2,6 +2,7 @@ package it.uniba.di.lacam.ml.structuredpredictor.predictiveclustering;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.Stack;
@@ -59,13 +60,14 @@ public class PredictiveClusterInducer<K,E> {
  * @param queries
  * @return
  */
-	public <K,E> PredictiveTree<OWLClassExpression,Model<K,E>> induceTree(SortedSet<OWLIndividual> posExs, SortedSet<OWLIndividual> negExs, SortedSet<OWLIndividual> undExs, Collection collection, Set<OWLDataProperty> queries) {		
+	public <K,E> PredictiveTree<OWLClassExpression,Model<K,E>> induceTree(SortedSet<OWLIndividual> posExs, SortedSet<OWLIndividual> negExs, SortedSet<OWLIndividual> undExs, Map<OWLIndividual,Model> collection, Set<OWLDataProperty> queries) {		
 		// K: data properties
 logger.info("Learning start");
 		Double prPos =0.5;
 		Double prNeg=0.5;
 		// combination of the models of the training individuals
-		ArrayList<Model> models= new ArrayList<Model>(collection) ;
+		System.out.println("Collection: "+collection);
+		ArrayList<Model> models= new ArrayList<Model>(collection.values()) ;
 		//computePriors(posExs, negExs, undExs, models);
 
 		Model[] m= models.toArray(new Model[models.size()]);
