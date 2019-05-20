@@ -11,9 +11,7 @@ import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLObjectComplementOf;
-
-import com.clarkparsia.pellet.owlapiv3.PelletReasoner;
-import com.hp.hpl.jena.reasoner.Reasoner;
+import org.semanticweb.owlapi.reasoner.OWLReasoner;
 
 
 /**
@@ -23,7 +21,7 @@ import com.hp.hpl.jena.reasoner.Reasoner;
  */
 public class Split {
 
-	public static void split(OWLClassExpression concept, OWLDataFactory  df, PelletReasoner  reasoner, SortedSet<OWLIndividual> posExs, SortedSet<OWLIndividual> negExs, SortedSet<OWLIndividual> undExs,
+	public static void split(OWLClassExpression concept, OWLDataFactory  df, OWLReasoner  reasoner, SortedSet<OWLIndividual> posExs, SortedSet<OWLIndividual> negExs, SortedSet<OWLIndividual> undExs,
 			SortedSet<OWLIndividual> posExsT, SortedSet<OWLIndividual> negExsT, SortedSet<OWLIndividual> undExsT, SortedSet<OWLIndividual> posExsF, SortedSet<OWLIndividual> negExsF,
 			SortedSet<OWLIndividual> undExsF) {
 
@@ -37,7 +35,7 @@ public class Split {
 
 	}
 
-	public static void splitGroup(OWLClassExpression concept, OWLDataFactory  dataFactory, PelletReasoner  reasoner, SortedSet<OWLIndividual> posExs, SortedSet<OWLIndividual> posExsT,
+	public static void splitGroup(OWLClassExpression concept, OWLDataFactory  dataFactory, OWLReasoner  reasoner, SortedSet<OWLIndividual> posExs, SortedSet<OWLIndividual> posExsT,
 			SortedSet<OWLIndividual> posExsF, SortedSet<OWLIndividual> posExsU) {
 		OWLClassExpression negConcept = dataFactory.getOWLObjectComplementOf(concept);
 
@@ -56,7 +54,7 @@ public class Split {
 
 	}
 	
-	public static void splitting(OWLDataFactory df, PelletReasoner reasoner, OWLIndividual[] trainingExs, SortedSet<OWLIndividual> posExs,
+	public static void splitting(OWLDataFactory df, OWLReasoner reasoner, OWLIndividual[] trainingExs, SortedSet<OWLIndividual> posExs,
 			SortedSet<OWLIndividual> negExs, SortedSet<OWLIndividual> undExs, OWLClassExpression classToDescribe2, boolean binaryClassification) {
 
 		for (int e=0; e<trainingExs.length; e++){

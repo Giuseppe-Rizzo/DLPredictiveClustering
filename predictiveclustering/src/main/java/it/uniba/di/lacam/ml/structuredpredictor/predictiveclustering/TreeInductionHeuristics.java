@@ -13,12 +13,11 @@ import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.clarkparsia.pellet.owlapiv3.PelletReasoner;
-import com.google.common.collect.Sets;
-
+//import openllet.owlapi.*;
 import it.uniba.di.lacam.ml.structuredpredictor.predictiveclustering.utils.Split;
 import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
 
@@ -31,7 +30,7 @@ import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
  */
 public class TreeInductionHeuristics {
 
-	private PelletReasoner reasoner;
+	private OWLReasoner reasoner;
 	private OWLDataFactory dataFactory= new OWLDataFactoryImpl();
 	private static Logger logger= LoggerFactory.getLogger(TreeInductionHeuristics.class);
 
@@ -62,14 +61,14 @@ public class TreeInductionHeuristics {
 
 
 
-	public PelletReasoner getReasoner() {
+	public OWLReasoner getReasoner() {
 		return reasoner;
 	}
 
 
 
-	public void setReasoner(PelletReasoner reasoner) {
-		this.reasoner = reasoner;
+	public void setReasoner(OWLReasoner reasoner2) {
+		this.reasoner = reasoner2;
 		//this.problem=problem; //learning problem 	
 	}
 

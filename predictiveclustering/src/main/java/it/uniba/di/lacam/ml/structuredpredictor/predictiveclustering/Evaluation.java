@@ -19,10 +19,9 @@ import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.search.EntitySearcher;
 import org.semanticweb.owlapi.vocab.OWL2Datatype;
 
-import com.clarkparsia.owlapiv3.OWL;
-import com.hp.hpl.jena.reasoner.Reasoner;
 
 import it.uniba.di.lacam.ml.structuredpredictor.predictiveclustering.utils.MathUtils;
 
@@ -47,17 +46,19 @@ public class Evaluation {
 		dataPropertyValues = kb.getDataPropertyValues();
 		// initialization of properties
 		Set<OWLOntology> ontologies = kb.getManager().getOntologies();
-		for (OWLOntology owlOntology : ontologies) {
-			System.out.println("Ontology: "+owlOntology);
+		for (OWLOntology onto : ontologies) {
 
-			Set<OWLDataProperty> queries2 = owlOntology.getDataPropertiesInSignature();
+			Set<OWLDataProperty> queries2 = onto.getDataPropertiesInSignature();
 			for(OWLDataProperty q: queries2) {
-				Set<OWLDataRange> ranges= q.getRanges(owlOntology);
-				Iterator<OWLDataRange> iterator = ranges.iterator();
+				
+
+				
+
+				Iterator<OWLDataRange> iterator = EntitySearcher.getRanges(q, onto).iterator();
 				boolean numeric = false;
-				while(iterator.hasNext() && !numeric) {
+				while (iterator.hasNext() && !numeric) {
 					OWLDataRange r= iterator.next();
-					if (r.isDatatype()) {
+					if (r.isOWLDatatype()) {
 						numeric=
 								r.asOWLDatatype().isFloat()||r.asOWLDatatype().isDouble()||r.asOWLDatatype().isInteger();
 						//System.out.println(r.asOWLDatatype()+" " +numeric);
@@ -88,7 +89,7 @@ public class Evaluation {
 					//				// access to the pair (property, value)  and conversion from the literal to double
 					// for each query
 					for (OWLDataProperty d: queries) {
-						Set<OWLLiteral> dataPropertyValues2 = ind.getDataPropertyValues(d,owlOntology);
+						Set<OWLLiteral> dataPropertyValues2 = kb.getReasoner().getDataPropertyValues(ind.asOWLNamedIndividual(),d);
 						//System.out.println("DP values "+ dataPropertyValues2.size());
 						// parse the literal
 
@@ -171,7 +172,7 @@ public class Evaluation {
 
 
 
-	
+
 	public  void bootstrap( int nFolds) throws Exception {
 		System.out.println(nFolds+"-fold BOOTSTRAP Experiment on ontology: ");	
 

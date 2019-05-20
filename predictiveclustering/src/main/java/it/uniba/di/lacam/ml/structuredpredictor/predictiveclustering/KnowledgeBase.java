@@ -4,9 +4,11 @@ import java.io.File;
 import java.net.URI;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.semanticweb.HermiT.ReasonerFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -14,6 +16,7 @@ import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLDataPropertyExpression;
 import org.semanticweb.owlapi.model.OWLDataRange;
+import org.semanticweb.owlapi.model.OWLDatatype;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
@@ -22,16 +25,20 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.BufferingMode;
+import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.util.SimpleIRIMapper;
 
-import com.clarkparsia.pellet.owlapiv3.PelletReasoner;
+//import com.clarkparsia.pellet.owlapiv3.PelletReasoner;
+//
+//import openllet.owlapi.OpenlletReasoner;
+//import openllet.owlapi.OpenlletReasonerFactory;
 
 public class KnowledgeBase {
 
 	private OWLOntologyManager manager;
 	private String urlOwlFile = "";
 	private OWLDataFactory dataFactory;
-	private PelletReasoner reasoner;
+	private OWLReasoner reasoner;
 	private OWLClass[] allConcepts;
 	private OWLObjectProperty[] allRoles;
 	private OWLIndividual[] allExamples;
@@ -75,13 +82,13 @@ public class KnowledgeBase {
 
 
 
-	public PelletReasoner getReasoner() {
+	public OWLReasoner getReasoner() {
 		return reasoner;
 	}
 
 
 
-	public void setReasoner(PelletReasoner reasoner) {
+	public void setReasoner(OWLReasoner reasoner) {
 		this.reasoner = reasoner;
 	}
 
@@ -141,6 +148,7 @@ public class KnowledgeBase {
 
 	
 	
+	@SuppressWarnings("deprecation")
 	public   OWLOntology initKB() {
 
 		manager = OWLManager.createOWLOntologyManager();        
@@ -163,7 +171,9 @@ public class KnowledgeBase {
 		}
 
 
-		reasoner = new PelletReasoner(ontology, BufferingMode.NON_BUFFERING);
+		reasoner = new ReasonerFactory().createReasoner(ontology);
+				//OpenlletReasonerFactory.getInstance().createNonBufferingReasoner(ontology);
+				
 		
 
 //		reasoner.getKB().realize();
@@ -196,9 +206,14 @@ public class KnowledgeBase {
 		Set<OWLNamedIndividual> indList = ontology.getIndividualsInSignature();
 		allExamples = new OWLIndividual[indList.size()];
 		int i=0;
+		Set<OWLDataProperty> pes = ontology.getDataPropertiesInSignature();
 		for(OWLNamedIndividual ind : indList) {
-			allExamples[i++] = ind;   
-			Map<OWLDataPropertyExpression, Set<OWLLiteral>> dataPropertyValues = ind.getDataPropertyValues(ontology);
+			allExamples[i++] = ind;  
+			Map<OWLDataPropertyExpression, Set<OWLLiteral>> dataPropertyValues = new HashMap<>();
+			for (OWLDataProperty owlDataProperty : pes) {
+				dataPropertyValues.put(owlDataProperty, reasoner.getDataPropertyValues(ind, owlDataProperty));
+			
+			}
 			this.dataPropertyValues.put(ind, dataPropertyValues);
 			//Collection<Set<OWLLiteral>> values = dataPropertyValues.values();
 //			for (Set<OWLLiteral> set : values) {

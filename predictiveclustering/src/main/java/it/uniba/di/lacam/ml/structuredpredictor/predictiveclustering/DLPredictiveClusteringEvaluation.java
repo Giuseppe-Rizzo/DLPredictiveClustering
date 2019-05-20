@@ -11,8 +11,9 @@ public class DLPredictiveClusteringEvaluation {
 	}
 
 	public static void main(String[] args) throws Exception {
-	Evaluation  ev = new  Evaluation("C:/Users/Giuseppe/Documents/ontos/ontos4ArtificialLP/biopax.owl");	
-	ev.bootstrap(Integer.parseInt("5"));
+		
+		Evaluation  ev = new  Evaluation(args[0]);	
+	ev.bootstrap(Integer.parseInt(args[1]));
 	
 
 	}

@@ -17,14 +17,16 @@ import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.clarkparsia.pellet.owlapiv3.PelletReasoner;
+//import openllet.owlapi.*;
 
 import it.uniba.di.lacam.ml.structuredpredictor.predictiveclustering.utils.Couple;
 import it.uniba.di.lacam.ml.structuredpredictor.predictiveclustering.utils.Npla;
 import it.uniba.di.lacam.ml.structuredpredictor.predictiveclustering.utils.Split;
+import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
 
 /**
  * Implementation of the procedure for growing and for making prediction through Predictive Clustering Trees
@@ -34,10 +36,11 @@ import it.uniba.di.lacam.ml.structuredpredictor.predictiveclustering.utils.Split
  * @param <E> the models 
  */
 public class PredictiveClusterInducer<K,E> {
-	private PelletReasoner reasoner;
+	private OWLReasoner reasoner;
 	private PredictiveTree<K,E> tree;
 	private int MAXDEPTH= 5; 
 	private static boolean regressionTask= true;
+	private static OWLDataFactory df= new OWLDataFactoryImpl();
 
 	private static Logger logger = LoggerFactory.getLogger(PredictiveClusterInducer.class);
 
@@ -46,7 +49,7 @@ public class PredictiveClusterInducer<K,E> {
 	}
 
 
-	public PredictiveClusterInducer(PelletReasoner r) {
+	public PredictiveClusterInducer(OWLReasoner r) {
 		reasoner=r;
 	}
 
@@ -133,7 +136,7 @@ logger.info("Learning start");
 				SortedSet<OWLIndividual> posExsF = new TreeSet<OWLIndividual>();
 				SortedSet<OWLIndividual> posExsT = new TreeSet<OWLIndividual>();
 				SortedSet<OWLIndividual> negExsT = new TreeSet<OWLIndividual>();
-				Split.split(bestDescription, reasoner.getManager().getOWLDataFactory(), reasoner, posExs, negExs, undExs, posExsT, negExsT, undExsT, posExsF, negExsF, undExsF); 
+				Split.split(bestDescription,  df, reasoner, posExs, negExs, undExs, posExsT, negExsT, undExsT, posExsF, negExsF, undExsF); 
 
 				// set the root
 				currentTree.setRoot(bestDescription, localModel2);

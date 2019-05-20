@@ -16,6 +16,7 @@ import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.reasoner.Node;
 import org.semanticweb.owlapi.reasoner.NodeSet;
+import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,9 +25,6 @@ import org.slf4j.LoggerFactory;
 
 
 
-
-import com.clarkparsia.pellet.owlapiv3.PelletReasoner;
-import com.hp.hpl.jena.reasoner.Reasoner;
 
 import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
 //import evaluation.Parameters;
@@ -51,7 +49,7 @@ public class DLTreesRefinementOperator{
 	private Random generator;
 	
 	//private OWLClassExpression expressio
-	private PelletReasoner r;
+	private OWLReasoner r;
 	protected OWLDataFactory dataFactory = new OWLDataFactoryImpl();
 
 	private int beam;
@@ -68,25 +66,25 @@ public class DLTreesRefinementOperator{
 	}
 
 
-	public DLTreesRefinementOperator (PelletReasoner reasoner, int beam) {
+	public DLTreesRefinementOperator (OWLReasoner reasoner, int beam) {
 		super();
 		// TODO Auto-generated constructor stub
 		r=reasoner;
 		//System.out.println("is Reasoner null? "+reasoner==null);
 		allConcepts=new ArrayList<OWLClass>();
-		Set<OWLOntology> ontologies = reasoner.getManager().getOntologies();
-		for (OWLOntology owlOntology : ontologies) {
+		OWLOntology ontologies = reasoner.getRootOntology();
+		//for (OWLOntology owlOntology : ontologies) {
 			
-			allConcepts.addAll(owlOntology.getClassesInSignature());
-		}
+			allConcepts.addAll(ontologies.getClassesInSignature());
+		//}
 		
 		//System.out.println("all+ Concepts: "+allConcepts.size());
 		allRoles= new ArrayList<OWLObjectProperty>();
-		for (OWLOntology owlOntology : ontologies) {
+		//for (OWLOntology owlOntology : ontologies) {
 			
-			allRoles.addAll(owlOntology.getObjectPropertiesInSignature());
+			allRoles.addAll(ontologies.getObjectPropertiesInSignature());
 			
-		}
+	//	}
 		
 		this.beam=beam; // set the maximum number of candidates that can be generated
 		
@@ -214,23 +212,23 @@ public class DLTreesRefinementOperator{
 
 
 	//	
-	public void setReasoner(PelletReasoner reasoner) {
+	public void setReasoner(OWLReasoner reasoner) {
 		// TODO Auto-generated method stub
 		this.r= reasoner;
 		allConcepts=new ArrayList<OWLClass>();
-		Set<OWLOntology> ontologies = reasoner.getManager().getOntologies();
-		for (OWLOntology owlOntology : ontologies) {
+		OWLOntology ontologies = reasoner.getRootOntology();
+		//for (OWLOntology owlOntology : ontologies) {
 			
-			allConcepts.addAll(owlOntology.getClassesInSignature());
-		}
+			allConcepts.addAll(ontologies.getClassesInSignature());
+		//}
 		
 		//System.out.println("all+ Concepts: "+allConcepts.size());
 		allRoles= new ArrayList<OWLObjectProperty>();
-		for (OWLOntology owlOntology : ontologies) {
+		//for (OWLOntology owlOntology : ontologies) {
 			
-			allRoles.addAll(owlOntology.getObjectPropertiesInSignature());
+			allRoles.addAll(ontologies.getObjectPropertiesInSignature());
 			
-		}
+		//}
 
 	}
 
